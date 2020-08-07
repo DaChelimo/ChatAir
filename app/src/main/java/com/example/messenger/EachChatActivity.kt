@@ -235,8 +235,12 @@ class EachChatActivity : AppCompatActivity() {
             Timber.e("Error occurred.")
             return
         }
-        val refMessage = EachMessage(ref.key!!, firebaseAuth.uid!!, friendUser?.uid!!, chooseImageUrl, binding.chatEdit.text.toString(), System.currentTimeMillis() / 1000)
-
+        if (myAccount?.userName == null || myAccount?.profilePictureUrl == null || friendUser == null) {
+            Timber.e("friendUser == null is ${friendUser == null} and myAccount?.userName == null is ${myAccount?.userName == null} and myAccount?.profilePictureUrl == null is ${myAccount?.profilePictureUrl == null}")
+            return
+        }
+        val refMessage = EachMessage(id = ref.key!!, fromId = firebaseAuth.uid!!, toId = friendUser?.uid!!, imageUrl = chooseImageUrl, textMessage = binding.chatEdit.text.toString(), timeStamp = System.currentTimeMillis() / 1000, username = myAccount?.userName!!, profilePictureUrl = myAccount?.profilePictureUrl!!, receiverAccount = friendUser, senderAccount = myAccount)
+// data class EachMessage(val id: String, val fromId: String, val toId: String, val imageUrl: String?, val textMessage: String, val timeStamp: Long, val username: String, val profilePictureUrl: String){
         setFirebaseValues(ref, toRef, refMessage)
     }
 

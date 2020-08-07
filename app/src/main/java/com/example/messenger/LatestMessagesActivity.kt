@@ -1,17 +1,16 @@
 package com.example.messenger
 
 import android.content.Intent
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
+import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
 import com.bumptech.glide.Glide
 import com.example.messenger.databinding.ActivityLatestMessagesBinding
 import com.google.firebase.database.ChildEventListener
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
-import com.google.firebase.database.ValueEventListener
 import com.google.firebase.messaging.FirebaseMessaging
 import com.xwray.groupie.GroupAdapter
 import com.xwray.groupie.GroupieViewHolder
@@ -49,24 +48,17 @@ class LatestMessagesActivity : AppCompatActivity() {
             }
 
         adapter.setOnItemClickListener { item, view ->
-            val chatMessageItem = item as LatestMessageItem
-            val friendUid = chatMessageItem.chatMessage.toId
+            item as LatestMessageItem
+            if (item.chatMessage.receiverAccount == null){
+                Timber.d("item.chatMessage.friendUser is null")
+                return@setOnItemClickListener
+            }
 
-            val ref = firebaseDatabase.getReference("/users/$friendUid")
+            val intent = Intent(view.context, EachChatActivity::class.java)
+            intent.putExtra(USER_KEY, if (item.chatMessage.senderAccount?.uid != firebaseAuth.uid) item.chatMessage.senderAccount else item.chatMessage.receiverAccount)
+            Timber.i("item is ${item.chatMessage} and user is ${item.chatMessage}")
+            startActivity(intent)
 
-            ref.addValueEventListener(object : ValueEventListener{
-                override fun onCancelled(error: DatabaseError) {
-
-                }
-
-                override fun onDataChange(snapshot: DataSnapshot) {
-                    val user = snapshot.getValue(User::class.java) ?: return
-                    val intent = Intent(view.context, EachChatActivity::class.java)
-                    intent.putExtra(USER_KEY, user)
-                    Timber.i("item is $item.")
-                    startActivity(intent)
-                }
-            })
         }
 
         listenForLatestMessages()
@@ -82,6 +74,7 @@ class LatestMessagesActivity : AppCompatActivity() {
         }
     }
 
+
     private fun listenForLatestMessages(){
         latestMessagesMap.clear()
         val ref = firebaseDatabase.getReference("/latest-messages/${firebaseAuth.uid}")
@@ -95,15 +88,16 @@ class LatestMessagesActivity : AppCompatActivity() {
             }
 
             override fun onChildChanged(snapshot: DataSnapshot, previousChildName: String?) {
-                val chatMessage = snapshot.getValue(EachMessage::class.java) ?: return
-
-                if (chatMessage.fromId == firebaseAuth.uid && chatMessage.toId == firebaseAuth.uid){
-                    Timber.d("Same account in latest activity")
-                }
-                else {
-                    latestMessagesMap[chatMessage.id] = chatMessage
-                    refreshRecyclerViewMessages()
-                }
+                listenForLatestMessages()
+//                val chatMessage = snapshot.getValue(EachMessage::class.java) ?: return
+//
+//                if (chatMessage.fromId == firebaseAuth.uid && chatMessage.toId == firebaseAuth.uid){
+//                    Timber.d("Same account in latest activity")
+//                }
+//                else {
+//                    latestMessagesMap[chatMessage.id] = chatMessage
+//                    refreshRecyclerViewMessages()
+//                }
             }
 
             override fun onChildAdded(snapshot: DataSnapshot, previousChildName: String?) {
@@ -132,31 +126,27 @@ class LatestMessagesActivity : AppCompatActivity() {
         override fun bind(viewHolder: GroupieViewHolder, position: Int) {
             val layout = viewHolder.itemView
 
-            val ref = firebaseDatabase.getReference("/users")
+//            layout.latest_item_username.text = chatMessage.username
+//            Glide.with(layout.context)
+//                .load(chatMessage.profilePictureUrl)
+//                .placeholder(R.drawable.ic_baseline_person_24)
+//                .into(layout.latest_item_image)
 
-            ref.addValueEventListener(object : ValueEventListener{
-                override fun onCancelled(error: DatabaseError) {
+//            layout.latest_item_username.text = chatMessage.friendUser?.userName
+//            Glide.with(layout.context)
+//                .load(chatMessage.friendUser?.profilePictureUrl)
+//                .placeholder(R.drawable.ic_baseline_person_24)
+//                .into(layout.latest_item_image)
 
-                }
+            val otherAccount = if (chatMessage.senderAccount?.uid != firebaseAuth.uid) chatMessage.senderAccount else chatMessage.receiverAccount
 
-                override fun onDataChange(snapshot: DataSnapshot) {
-                    snapshot.children.forEach {
-                        val user = it.getValue(User::class.java) ?: return@forEach
+            Timber.d("otherAccount.username is ${otherAccount?.userName}")
 
-                        Timber.d("chatMessage.toId is ${chatMessage.toId} and user.uid is ${user.uid}")
-                        Timber.d("chatMessage.fromId is ${chatMessage.fromId} and firebaseAuth.uid is ${firebaseAuth.uid}")
-                        if(chatMessage.fromId == firebaseAuth.uid) {
-                            if (chatMessage.toId == user.uid) {
-                                layout.latest_item_username.text = user.userName
-                                Glide.with(layout.context)
-                                    .load(user.profilePictureUrl)
-                                    .placeholder(R.drawable.ic_placeholder_person_24)
-                                    .into(layout.latest_item_image)
-                            }
-                        }
-                    }
-                }
-            })
+            layout.latest_item_username.text = otherAccount?.userName
+            Glide.with(layout.context)
+                .load(otherAccount?.profilePictureUrl)
+                .placeholder(R.drawable.ic_baseline_person_24)
+                .into(layout.latest_item_image)
 
             var formatString = if (chatMessage.textMessage.length > 33) chatMessage.textMessage.substring(0..32) else chatMessage.textMessage
             if(chatMessage.textMessage.length > 27){

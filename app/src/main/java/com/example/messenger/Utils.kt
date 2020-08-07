@@ -11,7 +11,6 @@ import com.google.firebase.messaging.FirebaseMessaging
 import com.google.firebase.storage.FirebaseStorage
 import kotlinx.android.parcel.Parcelize
 import timber.log.Timber
-import java.util.*
 
 val firebaseAuth = FirebaseAuth.getInstance()
 val firebaseStorage = FirebaseStorage.getInstance() // for images
@@ -53,6 +52,7 @@ fun sendUserToToDatabase(token: String){
 const val USER_KEY = "USER_KEY"
 const val INTENT_URI = "INTENT_URI"
 
-data class EachMessage(val id: String, val fromId: String, val toId: String, val imageUrl: String?, val textMessage: String, val timeStamp: Long){
-    constructor(): this("", "", "", null, "", -1)
+@Parcelize
+data class EachMessage(val id: String, val fromId: String, val toId: String, val imageUrl: String?, val textMessage: String, val timeStamp: Long, val username: String, val profilePictureUrl: String, val receiverAccount: User?, val senderAccount: User?): Parcelable{
+    constructor(): this("", "", "", null, "", -1, "", "", null, null)
 }
