@@ -69,6 +69,7 @@ class LatestMessagesActivity : AppCompatActivity() {
     fun refreshRecyclerViewMessages(){
         adapter.clear()
         Timber.i("latestMessagesMap size is ${latestMessagesMap.values.size}")
+
         latestMessagesMap.values.forEach {
             adapter.add(LatestMessageItem(it))
         }
@@ -89,15 +90,6 @@ class LatestMessagesActivity : AppCompatActivity() {
 
             override fun onChildChanged(snapshot: DataSnapshot, previousChildName: String?) {
                 listenForLatestMessages()
-//                val chatMessage = snapshot.getValue(EachMessage::class.java) ?: return
-//
-//                if (chatMessage.fromId == firebaseAuth.uid && chatMessage.toId == firebaseAuth.uid){
-//                    Timber.d("Same account in latest activity")
-//                }
-//                else {
-//                    latestMessagesMap[chatMessage.id] = chatMessage
-//                    refreshRecyclerViewMessages()
-//                }
             }
 
             override fun onChildAdded(snapshot: DataSnapshot, previousChildName: String?) {
@@ -125,18 +117,6 @@ class LatestMessagesActivity : AppCompatActivity() {
 
         override fun bind(viewHolder: GroupieViewHolder, position: Int) {
             val layout = viewHolder.itemView
-
-//            layout.latest_item_username.text = chatMessage.username
-//            Glide.with(layout.context)
-//                .load(chatMessage.profilePictureUrl)
-//                .placeholder(R.drawable.ic_baseline_person_24)
-//                .into(layout.latest_item_image)
-
-//            layout.latest_item_username.text = chatMessage.friendUser?.userName
-//            Glide.with(layout.context)
-//                .load(chatMessage.friendUser?.profilePictureUrl)
-//                .placeholder(R.drawable.ic_baseline_person_24)
-//                .into(layout.latest_item_image)
 
             val otherAccount = if (chatMessage.senderAccount?.uid != firebaseAuth.uid) chatMessage.senderAccount else chatMessage.receiverAccount
 
@@ -183,4 +163,5 @@ class LatestMessagesActivity : AppCompatActivity() {
 
         }
     }
+
 }

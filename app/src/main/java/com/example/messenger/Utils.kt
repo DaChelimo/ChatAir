@@ -27,7 +27,7 @@ const val TOO_SHORT_MESSAGE = "The format of the phone number provided is incorr
 const val INVALID_FORMAT_MESSAGE = "The format of the phone number provided is incorrect. Please enter the phone number in a format that can be parsed into E.164 format. E.164 phone numbers are written in the format [+][country code][subscriber number including area code]. [ Invalid format. ]"
 
 @Parcelize
-data class User(val userName: String, val uid: String, val profilePictureUrl: String, val aboutDescription: String?, val phoneNumber: String): Parcelable{
+data class User(var userName: String, val uid: String, var profilePictureUrl: String, var aboutDescription: String?, val phoneNumber: String): Parcelable{
     constructor(): this("",  "", "", null, "")
 }
 

@@ -9,6 +9,7 @@ import android.os.Bundle
 import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
 import com.bumptech.glide.Glide
@@ -29,6 +30,7 @@ import retrofit2.Callback
 import retrofit2.Response
 import timber.log.Timber
 import java.util.*
+import kotlin.collections.ArrayList
 
 class EachChatActivity : AppCompatActivity() {
 
@@ -39,7 +41,7 @@ class EachChatActivity : AppCompatActivity() {
         var myAccount: User? = null
         const val IMAGE_REQUEST_CODE = 1234
         var longPressMessage: Item<GroupieViewHolder>? = null
-        var longPressView: View? = null
+        var longPressView: ArrayList<View> = ArrayList()
     }
 
     val adapter = GroupAdapter<GroupieViewHolder>()
@@ -86,12 +88,13 @@ class EachChatActivity : AppCompatActivity() {
         adapter.setOnItemLongClickListener { item, view ->
 
             longPressMessage = item
-            longPressView = view
+            longPressView.add(view)
+            Timber.d("longPressView size is ${longPressView.size}")
 
             binding.longPressToolbar.visibility = View.VISIBLE
             binding.eachChatToolbar.visibility = View.GONE
 
-            var isApplicable: Boolean = when (item){
+            val isApplicable: Boolean = when (item){
                 is FriendImageChatItem -> {
                     false
                 }
@@ -371,7 +374,12 @@ class EachChatActivity : AppCompatActivity() {
     }
 
     private fun returnItemToDefault(){
-        longPressView?.setBackgroundColor(resources.getColor(R.color.defaultBlue))
+        Timber.d("$longPressView")
+        longPressView.forEach {
+            Timber.d("new view. Size is ${longPressView.size}")
+            it.setBackgroundColor(resources.getColor(R.color.defaultBlue))
+        }
+        longPressView.clear()
     }
 
     private fun deleteMessage() {
@@ -476,22 +484,38 @@ class EachChatActivity : AppCompatActivity() {
         val toId = friendUser?.uid
         val myRef =
             firebaseDatabase.getReference("/user-messages/$fromId/$toId/${message.newMessage.id}")
-        val toRef =
-            firebaseDatabase.getReference("/user-messages/$toId/$fromId/${message.newMessage.id}")
+        firebaseDatabase.getReference("/user-messages/$toId/$fromId/${message.newMessage.id}")
 
         val latestMessagesFromRef = firebaseDatabase.getReference("/latest-messages/$fromId/$toId")
         val latestMessagesToRef = firebaseDatabase.getReference("/latest-messages/$toId/$fromId")
 
-        var toRefClass: EachMessage?
-        var myRefClass: EachMessage?
+        val alertDialog = AlertDialog.Builder(this)
+            .setTitle("Delete message")
+            .setMessage("Are you sure you want to delete message from ${friendUser?.userName}")
+            .setPositiveButton("DELETE FOR ME") {_, _ ->
+                deleteFriendMessageForMe(myRef, latestMessagesFromRef, latestMessagesToRef)
+                listenForMessages()
+            }
+            .setNegativeButton("CANCEL") {_,_ -> }
+            .create()
 
+        alertDialog.show()
+
+    }
+
+
+    private fun deleteFriendMessageForMe(
+        myRef: DatabaseReference,
+        latestMessagesFromRef: DatabaseReference,
+        latestMessagesToRef: DatabaseReference
+    ) {
         myRef.addValueEventListener(object : ValueEventListener {
             override fun onCancelled(error: DatabaseError) {
                 Timber.e(error.details)
             }
 
             override fun onDataChange(snapshot: DataSnapshot) {
-                myRefClass = snapshot.getValue(EachMessage::class.java)
+                val myRefClass = snapshot.getValue(EachMessage::class.java)
                 myRefClass?.textMessage = "This message was deleted."
                 myRef.setValue(myRefClass).addOnSuccessListener {
                     Timber.d("myRef change done")
@@ -500,24 +524,6 @@ class EachChatActivity : AppCompatActivity() {
                 }
                 latestMessagesFromRef.setValue(myRefClass)
                 latestMessagesToRef.setValue(myRefClass)
-            }
-        })
-
-        toRef.addValueEventListener(object : ValueEventListener {
-            override fun onCancelled(error: DatabaseError) {
-                Timber.e(error.details)
-            }
-
-            override fun onDataChange(snapshot: DataSnapshot) {
-                toRefClass = snapshot.getValue(EachMessage::class.java)
-                toRefClass?.textMessage = "This message was deleted."
-                toRef.setValue(toRefClass).addOnSuccessListener {
-                    Timber.d("toRef change done")
-                    listenForMessages()
-                    longPressView?.setBackgroundColor(resources.getColor(R.color.defaultBlue))
-                }.addOnFailureListener {
-                    Timber.e(it)
-                }
             }
         })
     }
@@ -533,9 +539,53 @@ class EachChatActivity : AppCompatActivity() {
         val latestMessagesFromRef = firebaseDatabase.getReference("/latest-messages/$fromId/$toId")
         val latestMessagesToRef = firebaseDatabase.getReference("/latest-messages/$toId/$fromId")
 
-        var toRefClass: EachMessage?
-        var myRefClass: EachMessage?
+        val alertDialog = AlertDialog.Builder(this)
+            .setTitle("Delete Message")
+            .setMessage("Are you sure you want to delete this message")
+            .setPositiveButton("DELETE FOR ME") { _, _ ->
+                deleteMyMessageForMe(myRef, latestMessagesFromRef, latestMessagesToRef)
+                listenForMessages()
+            }
+            .setNeutralButton("CANCEL") {_, _ -> }
+            .setNegativeButton("DELETE FOR EVERYONE") {_ ,_ ->
+                deleteMyMessageForMe(myRef, latestMessagesFromRef, latestMessagesToRef)
+                deleteMyMessageForFriend(toRef)
+                listenForMessages()
+            }
+            .create()
 
+        alertDialog.show()
+    }
+
+    private fun deleteMyMessageForFriend(
+        toRef: DatabaseReference
+    ) {
+        var toRefClassInternal: EachMessage?
+        toRef.addValueEventListener(object : ValueEventListener {
+            override fun onCancelled(error: DatabaseError) {
+                Timber.e(error.details)
+            }
+
+            override fun onDataChange(snapshot: DataSnapshot) {
+                toRefClassInternal = snapshot.getValue(EachMessage::class.java)
+                toRefClassInternal?.textMessage = "This message was deleted."
+                toRef.setValue(toRefClassInternal)
+                    .addOnSuccessListener {
+                        Timber.d("toRef change done")
+
+                    }.addOnFailureListener {
+                        Timber.e(it)
+                    }
+            }
+        })
+    }
+
+    private fun deleteMyMessageForMe(
+        myRef: DatabaseReference,
+        latestMessagesFromRef: DatabaseReference,
+        latestMessagesToRef: DatabaseReference
+    ) {
+        var myRefClass: EachMessage?
         myRef.addValueEventListener(object : ValueEventListener {
             override fun onCancelled(error: DatabaseError) {
                 Timber.e(error.details)
@@ -551,26 +601,6 @@ class EachChatActivity : AppCompatActivity() {
                 }
                 latestMessagesFromRef.setValue(myRefClass)
                 latestMessagesToRef.setValue(myRefClass)
-            }
-        })
-
-        toRef.addValueEventListener(object : ValueEventListener {
-            override fun onCancelled(error: DatabaseError) {
-                Timber.e(error.details)
-            }
-
-            override fun onDataChange(snapshot: DataSnapshot) {
-                toRefClass = snapshot.getValue(EachMessage::class.java)
-                toRefClass?.textMessage = "This message was deleted."
-                toRef.setValue(toRefClass)
-                    .addOnSuccessListener {
-                        Timber.d("toRef change done")
-                        listenForMessages()
-                        longPressView?.setBackgroundColor(resources.getColor(R.color.defaultBlue))
-
-                    }.addOnFailureListener {
-                        Timber.e(it)
-                    }
             }
         })
     }
