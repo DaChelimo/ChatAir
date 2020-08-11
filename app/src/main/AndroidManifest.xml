@@ -10,16 +10,31 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".EachChatActivity"
-            android:parentActivityName=".LatestMessagesActivity"/>
+
+        <activity
+            android:name=".OthersProfileActivity"
+            android:theme="@style/NoActionBar"/>
+
+        <activity
+            android:name=".UserProfileActivity"
+            android:parentActivityName=".LatestMessagesActivity"
+            android:theme="@style/NoActionBar" />
+
+        <activity
+            android:name=".EachChatActivity"
+            android:parentActivityName=".LatestMessagesActivity"
+            android:theme="@style/NoActionBar" />
+
         <activity
             android:name=".NewUsersActivity"
             android:parentActivityName=".LatestMessagesActivity">
             <intent-filter>
-                <action android:name="android.intent.action.SEND"/>
-                <category android:name="android.intent.category.APP_MESSAGING"/>
-                <category android:name="android.intent.category.DEFAULT"/>
-                <data android:mimeType="text/*"/>
+                <action android:name="android.intent.action.SEND" />
+
+                <category android:name="android.intent.category.APP_MESSAGING" />
+                <category android:name="android.intent.category.DEFAULT" />
+
+                <data android:mimeType="text/*" />
             </intent-filter>
         </activity>
         <activity android:name=".ChooseActivity">
@@ -29,10 +44,10 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
         <service
             android:name=".MyFirebaseMessagingService"
             android:permission="com.google.android.c2dm.permission.SEND">
-
             <intent-filter>
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />
                 <action android:name="com.google.android.c2dm.intent.RECEIVE" />
@@ -45,16 +60,19 @@
                 android:name="firebase_analytics_collection_enabled"
                 android:value="false" />
         </service>
-<!--        <service android:name=".MyFirebaseInstanceIDService">-->
-<!--            <intent-filter>-->
-<!--                <action android:name="com.google.firebase.INSTANCE_ID_EVENT"/>-->
-<!--            </intent-filter>-->
-<!--        </service>-->
+
         <activity android:name=".LatestMessagesActivity" />
         <activity
             android:name=".LoginActivity"
-            android:parentActivityName=".RegisterActivity"/>
-        <activity android:name=".RegisterActivity" />
+            android:parentActivityName=".RegisterActivity"
+            android:windowSoftInputMode="adjustResize" />
+        <activity
+            android:name=".RegisterActivity"
+            android:windowSoftInputMode="adjustResize" />
+
+        <meta-data
+            android:name="preloaded_fonts"
+            android:resource="@array/preloaded_fonts" />
     </application>
 
 </manifest>

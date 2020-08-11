@@ -174,10 +174,8 @@ class LatestMessagesActivity : AppCompatActivity() {
 
                 true
             }
-            R.id.sign_out -> {
-                firebaseAuth.signOut()
-                val intent = Intent(this, RegisterActivity::class.java)
-                intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TASK.or(Intent.FLAG_ACTIVITY_NEW_TASK)
+            R.id.my_account -> {
+                val intent = Intent(this, UserProfileActivity::class.java)
                 startActivity(intent)
                 true
             }

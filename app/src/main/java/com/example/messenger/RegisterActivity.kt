@@ -12,8 +12,12 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
 import com.bumptech.glide.Glide
 import com.example.messenger.databinding.ActivityRegisterBinding
+import com.google.firebase.FirebaseException
+import com.google.firebase.auth.PhoneAuthCredential
+import com.google.firebase.auth.PhoneAuthProvider
 import timber.log.Timber
 import java.util.*
+import java.util.concurrent.TimeUnit
 
 class RegisterActivity : AppCompatActivity() {
 
@@ -21,7 +25,6 @@ class RegisterActivity : AppCompatActivity() {
 
     lateinit var userName: EditText
     lateinit var email: EditText
-    lateinit var password: EditText
     lateinit var registerBtn: Button
 
 //    var imageUrl: String = "https://thumbs.dreamstime.com/b/default-avatar-profile-vector-user-profile-default-avatar-profile-vector-user-profile-profile-179376714.jpg"
@@ -34,7 +37,6 @@ class RegisterActivity : AppCompatActivity() {
         supportActionBar?.title = "Register Account"
 
         userName = binding.usernameEdit
-        password = binding.passwordEdit
         registerBtn = binding.registerBtn
         email = binding.emailEdit
         binding.selectPhotoBtn.alpha = 0F
@@ -77,7 +79,7 @@ class RegisterActivity : AppCompatActivity() {
     }
 
     private fun doRegister(){
-        if (userName.text.isEmpty() || password.text.isEmpty()){
+        if (userName.text.isEmpty()){
             Toast.makeText(this, "Invalid input", Toast.LENGTH_SHORT).show()
             return
         }
@@ -87,34 +89,37 @@ class RegisterActivity : AppCompatActivity() {
         }
 
         val emailText = email.text.toString()
-        val passwordText = password.text.toString()
         Toast.makeText(this, "Processing input...", Toast.LENGTH_SHORT).show()
 
-        firebaseAuth.createUserWithEmailAndPassword(emailText, passwordText)
-            .addOnSuccessListener {
-                val displayName = it.user?.displayName
-                Timber.i("firebaseAuth.currentUser?.displayName is ${firebaseAuth.currentUser?.displayName} and it.user?.displayName is ${it.user?.displayName}")
-                val uid = it.user?.uid
-                Timber.i("firebaseAuth.uid is ${firebaseAuth.uid} and it.user?.uid is ${it.user?.uid}")
-                Timber.i("displayName is $displayName and uid is $uid")
-                uploadImageToFireStoreStorage()
-            }
-            .addOnFailureListener { error: Exception ->
-                Timber.e(error)
-                when (error.message) {
-                    "The email address is already in use by another account." -> {
-                        Toast.makeText(applicationContext, "An account with this email already exists.", Toast.LENGTH_LONG).show()
+
+        firebasePhoneAuth.verifyPhoneNumber(emailText, 60, TimeUnit.SECONDS, this, object: PhoneAuthProvider.OnVerificationStateChangedCallbacks() {
+            override fun onVerificationCompleted(credential: PhoneAuthCredential) {
+                firebaseAuth.signInWithCredential(credential)
+                    .addOnSuccessListener {
+                        Timber.d("Success.")
+                        val displayName = it.user?.displayName
+                        Timber.i("firebaseAuth.currentUser?.displayName is ${firebaseAuth.currentUser?.displayName} and it.user?.displayName is ${it.user?.displayName}")
+                        val uid = it.user?.uid
+                        Timber.i("firebaseAuth.uid is ${firebaseAuth.uid} and it.user?.uid is ${it.user?.uid}")
+                        Timber.i("displayName is $displayName and uid is $uid")
+                        uploadImageToFireStoreStorage()
+                        Toast.makeText(this@RegisterActivity, "Success. You have signed up.", Toast.LENGTH_SHORT).show()
                     }
-                    "The email address is badly formatted." -> {
-                        Toast.makeText(applicationContext, "Enter a valid email address.", Toast.LENGTH_LONG).show()
+                    .addOnFailureListener {
+                        Timber.e(it)
+                        Toast.makeText(this@RegisterActivity, "Error occurred.", Toast.LENGTH_SHORT).show()
                     }
-                    "The given password is invalid. [ Password should be at least 6 characters ]" -> {
-                        Toast.makeText(applicationContext, "Password is too short. Try a longer one.", Toast.LENGTH_LONG).show()
-                    }
-                    else -> Toast.makeText(applicationContext, "Unknown error occurred.", Toast.LENGTH_LONG).show()
-                }
             }
 
+            override fun onCodeSent(verificationId: String, token: PhoneAuthProvider.ForceResendingToken) {
+                storedVerificationId = verificationId
+                resendingToken = token
+            }
+
+            override fun onVerificationFailed(error: FirebaseException) {
+                Timber.e(error)
+            }
+        })
     }
 
     private fun uploadImageToFireStoreStorage(){
@@ -135,7 +140,7 @@ class RegisterActivity : AppCompatActivity() {
         val uid = firebaseAuth.uid
         val ref = firebaseDatabase.getReference("/users/${uid}")
         Timber.i("ref is $ref")
-        val user = uid?.let { User(binding.usernameEdit.text.toString(), it, onlineImageUrl) }
+        val user = uid?.let { User(binding.usernameEdit.text.toString(), it, onlineImageUrl, null, binding.emailEdit.text.toString()) }
         ref.setValue(user)
         val intent = Intent(this, LatestMessagesActivity::class.java)
         intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TASK.or(Intent.FLAG_ACTIVITY_NEW_TASK)

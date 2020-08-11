@@ -2,6 +2,7 @@ package com.example.messenger
 
 import android.os.Parcelable
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.PhoneAuthProvider
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
@@ -17,10 +18,17 @@ val firebaseStorage = FirebaseStorage.getInstance() // for images
 val firebaseDatabase = FirebaseDatabase.getInstance() // for data
 val firebaseInstanceId = FirebaseInstanceId.getInstance()
 val firebaseMessaging = FirebaseMessaging.getInstance()
+val firebasePhoneAuth = PhoneAuthProvider.getInstance()
+
+var storedVerificationId: String? = null
+var resendingToken: PhoneAuthProvider.ForceResendingToken? = null
+
+const val TOO_SHORT_MESSAGE = "The format of the phone number provided is incorrect. Please enter the phone number in a format that can be parsed into E.164 format. E.164 phone numbers are written in the format [+][country code][subscriber number including area code]. [ TOO_SHORT ]"
+const val INVALID_FORMAT_MESSAGE = "The format of the phone number provided is incorrect. Please enter the phone number in a format that can be parsed into E.164 format. E.164 phone numbers are written in the format [+][country code][subscriber number including area code]. [ Invalid format. ]"
 
 @Parcelize
-data class User(val userName: String, val uid: String, val profilePictureUrl: String): Parcelable{
-    constructor(): this("",  "", "")
+data class User(val userName: String, val uid: String, val profilePictureUrl: String, val aboutDescription: String?, val phoneNumber: String): Parcelable{
+    constructor(): this("",  "", "", null, "")
 }
 
 data class TokenClass(val userName: String, val uid: String, val token: String){
@@ -51,8 +59,9 @@ fun sendUserToToDatabase(token: String){
 
 const val USER_KEY = "USER_KEY"
 const val INTENT_URI = "INTENT_URI"
+const val FRIEND_USER_PROFILE = "FRIEND_USER_PROFILE"
 
 @Parcelize
-data class EachMessage(val id: String, val fromId: String, val toId: String, val imageUrl: String?, val textMessage: String, val timeStamp: Long, val username: String, val profilePictureUrl: String, val receiverAccount: User?, val senderAccount: User?): Parcelable{
+data class EachMessage(val id: String, val fromId: String, val toId: String, val imageUrl: String?, var textMessage: String, val timeStamp: Long, val username: String, val profilePictureUrl: String, val receiverAccount: User?, val senderAccount: User?): Parcelable{
     constructor(): this("", "", "", null, "", -1, "", "", null, null)
 }
