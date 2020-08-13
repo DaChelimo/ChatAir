@@ -35,13 +35,16 @@ import kotlin.collections.ArrayList
 class EachChatActivity : AppCompatActivity() {
 
     lateinit var binding: ActivityEachChatBinding
-    companion object{
+
+    companion object {
         var friendUser: User? = null
         var currentUserImageUrl: String? = null
         var myAccount: User? = null
         const val IMAGE_REQUEST_CODE = 1234
         var longPressMessage: Item<GroupieViewHolder>? = null
         var longPressView: ArrayList<View> = ArrayList()
+        var messagesList: ArrayList<Item<GroupieViewHolder>> = ArrayList()
+        var canAllowLongClick = true
     }
 
     val adapter = GroupAdapter<GroupieViewHolder>()
@@ -49,6 +52,7 @@ class EachChatActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        canAllowLongClick = true
 
         binding = DataBindingUtil.setContentView(this, R.layout.activity_each_chat)
 
@@ -65,7 +69,9 @@ class EachChatActivity : AppCompatActivity() {
 
         val chatRecyclerView = binding.chatRecyclerview
         Timber.d("intentMessage is $intentMessage.")
-        if (intentMessage == null) Timber.d("IntentMessage is null") else binding.chatEdit.setText(intentMessage)
+        if (intentMessage == null) Timber.d("IntentMessage is null") else binding.chatEdit.setText(
+            intentMessage
+        )
 
         binding.chooseImage.setOnClickListener {
             val intent = Intent(Intent.ACTION_PICK)
@@ -74,7 +80,7 @@ class EachChatActivity : AppCompatActivity() {
         }
 
         binding.sendChatBtn.setOnClickListener {
-            if (binding.chatEdit.text.isEmpty()){
+            if (binding.chatEdit.text.isEmpty()) {
                 Toast.makeText(this, "Text cannot be empty", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
@@ -87,35 +93,44 @@ class EachChatActivity : AppCompatActivity() {
 
         adapter.setOnItemLongClickListener { item, view ->
 
-            longPressMessage = item
-            longPressView.add(view)
-            Timber.d("longPressView size is ${longPressView.size}")
+            if(canAllowLongClick) {
+                longPressMessage = item
+                longPressView.add(view)
+                Timber.d("longPressView size is ${longPressView.size}")
 
-            binding.longPressToolbar.visibility = View.VISIBLE
-            binding.eachChatToolbar.visibility = View.GONE
+                binding.longPressToolbar.visibility = View.VISIBLE
+                binding.eachChatToolbar.visibility = View.GONE
 
-            val isApplicable: Boolean = when (item){
-                is FriendImageChatItem -> {
-                    false
+                val isApplicable: Boolean = when (item) {
+                    is FriendImageChatItem -> {
+                        false
+                    }
+                    is MyImageChatItem -> {
+                        false
+                    }
+                    else -> {
+                        true
+                    }
                 }
-                is MyImageChatItem -> {
-                    false
+
+                Timber.d("isApplicable is $isApplicable")
+
+                if (isApplicable) {
+                    val longPressToolbar = binding.longPressToolbar
+                    setSupportActionBar(longPressToolbar)
+
+                    view.setBackgroundColor(resources.getColor(R.color.highlightColor))
                 }
-                else -> {
-                    true
-                }
+
+                canAllowLongClick = false
+
+                true
             }
+            else{
+                Timber.i("canAllowLongClick is $canAllowLongClick")
 
-            Timber.d("isApplicable is $isApplicable")
-
-            if (isApplicable){
-                val longPressToolbar = binding.longPressToolbar
-                setSupportActionBar(longPressToolbar)
-
-                view.setBackgroundColor(resources.getColor(R.color.highlightColor))
+                false
             }
-
-            true
         }
 
         binding.longPressCancelBtn.setOnClickListener {
@@ -140,7 +155,6 @@ class EachChatActivity : AppCompatActivity() {
             binding.eachChatToolbar.visibility = View.VISIBLE
 
             setToolbarData()
-            returnItemToDefault()
 
         }
 
@@ -151,7 +165,7 @@ class EachChatActivity : AppCompatActivity() {
         }
     }
 
-    private fun setToolbarData(){
+    private fun setToolbarData() {
         val toolbar = binding.eachChatToolbar
         binding.toolbarName.text = friendUser?.userName
         Glide.with(this)
@@ -172,7 +186,7 @@ class EachChatActivity : AppCompatActivity() {
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == IMAGE_REQUEST_CODE && resultCode == Activity.RESULT_OK && data != null){
+        if (requestCode == IMAGE_REQUEST_CODE && resultCode == Activity.RESULT_OK && data != null) {
             if (data.data == null) return
             val uri = data.data
             val ref = firebaseStorage.getReference("/images/chat-images/${UUID.randomUUID()}")
@@ -183,15 +197,15 @@ class EachChatActivity : AppCompatActivity() {
                     binding.chatEdit.setText(chooseImageUrl.toString())
                 }
             }.addOnFailureListener {
-                    Timber.e(it)
-                }
+                Timber.e(it)
+            }
         }
     }
 
-    private fun getProfilePicture(){
+    private fun getProfilePicture() {
         val myUid = firebaseAuth.uid
         val users = firebaseDatabase.getReference("/users")
-        users.addValueEventListener(object : ValueEventListener{
+        users.addValueEventListener(object : ValueEventListener {
             override fun onCancelled(error: DatabaseError) {
                 Timber.e(error.details)
             }
@@ -199,9 +213,9 @@ class EachChatActivity : AppCompatActivity() {
             override fun onDataChange(snapshot: DataSnapshot) {
                 snapshot.children.forEach {
                     val eachAvailableUser = it.getValue(User::class.java)
-                    if (eachAvailableUser != null){
+                    if (eachAvailableUser != null) {
                         Timber.i("eachAvailableUser.uid is ${eachAvailableUser.uid} and myUid is $myUid")
-                        if (eachAvailableUser.uid == myUid){
+                        if (eachAvailableUser.uid == myUid) {
                             myAccount = eachAvailableUser
                             currentUserImageUrl = eachAvailableUser.profilePictureUrl
                         }
@@ -211,31 +225,54 @@ class EachChatActivity : AppCompatActivity() {
         })
     }
 
-    private fun listenForMessages(){
+    private fun addMessageToAdapter(eachMessage: EachMessage) {
+
+        if (eachMessage.imageUrl == null) {
+            adapter.add(MyTextChatItem(eachMessage.textMessage, eachMessage))
+        } else {
+            adapter.add(MyImageChatItem(eachMessage.imageUrl))
+        }
+
+        val lastItem = adapter.itemCount - 1
+        Timber.i("adapter.itemCount - 1 is $lastItem and adapter.itemCount is ${adapter.itemCount}")
+        binding.chatRecyclerview.layoutManager?.scrollToPosition(lastItem)
+
+        val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+        imm.hideSoftInputFromWindow(binding.sendChatBtn.windowToken, 0)
+    }
+
+    private fun listenForMessages() {
         val fromId = firebaseAuth.uid
         val toId = friendUser?.uid
         val ref = firebaseDatabase.getReference("/user-messages/$fromId/$toId")
         adapter.clear()
-        ref.addListenerForSingleValueEvent(object : ValueEventListener{
-            override fun onCancelled(error: DatabaseError) {            }
+        ref.addListenerForSingleValueEvent(object : ValueEventListener {
+            override fun onCancelled(error: DatabaseError) {}
 
             override fun onDataChange(snapshot: DataSnapshot) {
                 snapshot.children.forEach {
                     val newMessage = it.getValue(EachMessage::class.java)
-                    if (newMessage != null){
-                        if (newMessage.fromId == firebaseAuth.uid){
+                    if (newMessage != null) {
+                        if (newMessage.fromId == firebaseAuth.uid) {
                             if (newMessage.imageUrl == null) {
-                                adapter.add(MyTextChatItem(newMessage.textMessage, newMessage))
+                                val adapterItem = MyTextChatItem(newMessage.textMessage, newMessage)
+                                adapter.add(adapterItem)
+                                messagesList.add(adapterItem)
+
+                            } else {
+                                val adapterItem = MyImageChatItem(newMessage.imageUrl)
+                                adapter.add(adapterItem)
+                                messagesList.add(adapterItem)
                             }
-                            else{
-                                adapter.add(MyImageChatItem(newMessage.imageUrl))
-                            }
-                        }else{
+                        } else {
                             if (newMessage.imageUrl == null) {
+                                val adapterItem = FriendTextChatItem(newMessage.textMessage, newMessage)
                                 adapter.add(FriendTextChatItem(newMessage.textMessage, newMessage))
-                            }
-                            else{
+                                messagesList.add(adapterItem)
+                            } else {
+                                val adapterItem = FriendImageChatItem(newMessage.imageUrl)
                                 adapter.add(FriendImageChatItem(newMessage.imageUrl))
+                                messagesList.add(adapterItem)
                             }
                         }
                         binding.chatEdit.text.clear()
@@ -252,16 +289,17 @@ class EachChatActivity : AppCompatActivity() {
         imm.hideSoftInputFromWindow(binding.sendChatBtn.windowToken, 0)
     }
 
-    private fun composeNotification(){
+    private fun composeNotification() {
         Timber.d("composeNotification called")
         val topic = "/topics/${friendUser?.uid}"
 
         var notification: Notification? = null
         var notificationBody: NotificationBody?
 
-        val ref = firebaseDatabase.getReference("/latest-messages/${firebaseAuth.uid}/${friendUser?.uid}")
+        val ref =
+            firebaseDatabase.getReference("/latest-messages/${firebaseAuth.uid}/${friendUser?.uid}")
 
-        ref.addValueEventListener(object : ValueEventListener{
+        ref.addValueEventListener(object : ValueEventListener {
             override fun onCancelled(error: DatabaseError) {
 
             }
@@ -284,23 +322,27 @@ class EachChatActivity : AppCompatActivity() {
 
     fun sendActualNotification(notification: Notification) {
         Timber.d("sendActualNotification called. notification is $notification")
-        RetrofitItem.postData.sendNotificationInApi(notification).enqueue(object : Callback<Notification>{
-            override fun onFailure(call: Call<Notification>, t: Throwable) {
-                Timber.e(t)
-            }
-
-            override fun onResponse(call: Call<Notification>, response: Response<Notification>) {
-                Timber.d("response.code is ${response.code()}")
-                if (response.code() == 400){
-                    Timber.i("Success: Notification sent")
-                    Timber.i("response body is ${response.body()}")
-
+        RetrofitItem.postData.sendNotificationInApi(notification)
+            .enqueue(object : Callback<Notification> {
+                override fun onFailure(call: Call<Notification>, t: Throwable) {
+                    Timber.e(t)
                 }
-            }
-        })
+
+                override fun onResponse(
+                    call: Call<Notification>,
+                    response: Response<Notification>
+                ) {
+                    Timber.d("response.code is ${response.code()}")
+                    if (response.code() == 400) {
+                        Timber.i("Success: Notification sent")
+                        Timber.i("response body is ${response.body()}")
+
+                    }
+                }
+            })
     }
 
-    private fun sendMessage(){
+    private fun sendMessage() {
         val fromId = firebaseAuth.uid
         val toId = friendUser?.uid
         val ref = firebaseDatabase.getReference("/user-messages/$fromId/$toId").push()
@@ -314,15 +356,31 @@ class EachChatActivity : AppCompatActivity() {
             Timber.e("friendUser == null is ${friendUser == null} and myAccount?.userName == null is ${myAccount?.userName == null} and myAccount?.profilePictureUrl == null is ${myAccount?.profilePictureUrl == null}")
             return
         }
-        val refMessage = EachMessage(id = ref.key!!, fromId = firebaseAuth.uid!!, toId = friendUser?.uid!!, imageUrl = chooseImageUrl, textMessage = binding.chatEdit.text.toString(), timeStamp = System.currentTimeMillis() / 1000, username = myAccount?.userName!!, profilePictureUrl = myAccount?.profilePictureUrl!!, receiverAccount = friendUser, senderAccount = myAccount)
+        val refMessage = EachMessage(
+            id = ref.key!!,
+            fromId = firebaseAuth.uid!!,
+            toId = friendUser?.uid!!,
+            imageUrl = chooseImageUrl,
+            textMessage = binding.chatEdit.text.toString(),
+            timeStamp = System.currentTimeMillis() / 1000,
+            username = myAccount?.userName!!,
+            profilePictureUrl = myAccount?.profilePictureUrl!!,
+            receiverAccount = friendUser,
+            senderAccount = myAccount
+        )
 
         setFirebaseValues(ref, toRef, refMessage)
     }
 
-    private fun setFirebaseValues(ref: DatabaseReference, toRef: DatabaseReference, refMessage: EachMessage){
+    private fun setFirebaseValues(
+        ref: DatabaseReference,
+        toRef: DatabaseReference,
+        refMessage: EachMessage
+    ) {
         toRef.setValue(refMessage)
         ref.setValue(refMessage).addOnSuccessListener {
-            listenForMessages()
+//            listenForMessages()
+            addMessageToAdapter(refMessage)
             composeNotification()
         }
         val fromId = firebaseAuth.uid
@@ -357,7 +415,7 @@ class EachChatActivity : AppCompatActivity() {
         startActivity(intent)
     }
 
-    private fun copyToClipboard(){
+    private fun copyToClipboard() {
         val clipboardManager = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
         val clipboardText = if (longPressMessage is MyTextChatItem) {
             val myTextChatItem = longPressMessage as MyTextChatItem
@@ -373,14 +431,130 @@ class EachChatActivity : AppCompatActivity() {
         Toast.makeText(this, "Copied to clipboard", Toast.LENGTH_SHORT).show()
     }
 
-    private fun returnItemToDefault(){
+    private fun returnItemToDefault() {
         Timber.d("$longPressView")
         longPressView.forEach {
             Timber.d("new view. Size is ${longPressView.size}")
             it.setBackgroundColor(resources.getColor(R.color.defaultBlue))
         }
         longPressView.clear()
+        canAllowLongClick = true
     }
+
+    private fun removeTextMessageFromAdapterForEveryone(
+        myRef: DatabaseReference,
+        latestMessagesFromRef: DatabaseReference
+    ) {
+        if (longPressMessage == null) {
+            Timber.d("longPressMessage is null")
+            return
+        }
+
+        deleteMyMessageForMe(myRef, latestMessagesFromRef)
+
+        val myTextChatItem = longPressMessage as MyTextChatItem
+
+        try {
+            if (myTextChatItem.newMessage.textMessage != "This message was deleted") {
+                myTextChatItem.newMessage.textMessage = "This message was deleted"
+
+                val position = messagesList.indexOf(longPressMessage!!)
+                messagesList[position] = myTextChatItem
+
+//            adapter.update(messagesList)
+                longPressMessage = myTextChatItem
+                adapter.notifyItemChanged(position)
+                longPressMessage = null
+            }
+        }
+        catch(e: ArrayIndexOutOfBoundsException){
+            Timber.e(e)
+            Timber.i("RemoveMessage for everyone did not work")
+            removeTextMessageFromAdapterForEveryone(myRef, latestMessagesFromRef)
+        }
+    }
+
+    var numberRepeated = 1
+
+    private fun removeTextMessageFromAdapterForMe(
+        myRef: DatabaseReference,
+        latestMessagesFromRef: DatabaseReference
+    ) {
+        if (longPressMessage == null) {
+            Timber.d("longPressMessage is null")
+            return
+        }
+        val position = messagesList.indexOf(longPressMessage!!)
+        Timber.d("messageList size is ${messagesList.size}")
+
+        try {
+            if (longPressMessage is MyTextChatItem) {
+                Timber.d("position is $position")
+
+                if (position >= 0) {
+                    Timber.d("It worked, no error")
+                }
+
+                val myTextChatItem = longPressMessage as MyTextChatItem
+                Timber.i("myTextChatItem is ${myTextChatItem.newMessage.textMessage}")
+
+                if (myTextChatItem.newMessage.textMessage != "This message was deleted") {
+                    myTextChatItem.newMessage.textMessage = "This message was deleted"
+
+                    (messagesList[position] as MyTextChatItem).newMessage.textMessage =
+                        "This message was deleted"
+
+                    adapter.update(messagesList)
+                    deleteMyMessageForMe(myRef, latestMessagesFromRef)
+                    longPressMessage = null
+
+                } else {
+                    adapter.remove(longPressMessage!!)
+
+                    val fromId = myTextChatItem.newMessage.fromId
+                    val toId = myTextChatItem.newMessage.toId
+                    val key = myTextChatItem.newMessage.id
+                    val ref = firebaseDatabase.getReference("/user-messages/$fromId/$toId/$key")
+
+                    longPressMessage = null
+
+                    ref.removeValue()
+                        .addOnSuccessListener {
+                            Timber.i("Removed successfully")
+                        }
+                        .addOnFailureListener {
+                            Timber.e(it)
+                        }
+                }
+            } else {
+                adapter.remove(longPressMessage!!)
+
+                val friendTextChatItem = longPressMessage as FriendTextChatItem
+                Timber.i("myTextChatItem is ${friendTextChatItem.newMessage.textMessage}")
+                longPressMessage = null
+
+                val fromId = friendTextChatItem.newMessage.fromId
+                val toId = friendTextChatItem.newMessage.toId
+                val key = friendTextChatItem.newMessage.id
+                val ref = firebaseDatabase.getReference("/user-messages/$fromId/$toId/$key")
+
+
+                ref.removeValue()
+                    .addOnSuccessListener {
+                        Timber.i("Removed successfully")
+                    }
+                    .addOnFailureListener {
+                        Timber.e(it)
+                    }
+            }
+        }
+        catch(e: ArrayIndexOutOfBoundsException){
+            Timber.e(e)
+            Timber.i("Exception called")
+            removeTextMessageFromAdapterForMe( myRef, latestMessagesFromRef)
+        }
+    }
+
 
     private fun deleteMessage() {
         if (longPressMessage == null) {
@@ -399,7 +573,8 @@ class EachChatActivity : AppCompatActivity() {
         }
     }
 
-    class MyTextChatItem(val text: String, val newMessage: EachMessage): Item<GroupieViewHolder>(){
+    class MyTextChatItem(val text: String, var newMessage: EachMessage) :
+        Item<GroupieViewHolder>() {
         override fun getLayout(): Int = R.layout.my_text_chat
 
         override fun bind(viewHolder: GroupieViewHolder, position: Int) {
@@ -417,7 +592,7 @@ class EachChatActivity : AppCompatActivity() {
         }
     }
 
-    class MyImageChatItem(private val myImageUrl: String): Item<GroupieViewHolder>(){
+    class MyImageChatItem(private val myImageUrl: String) : Item<GroupieViewHolder>() {
         override fun getLayout(): Int = R.layout.my_image_chat
 
         override fun bind(viewHolder: GroupieViewHolder, position: Int) {
@@ -439,7 +614,8 @@ class EachChatActivity : AppCompatActivity() {
         }
     }
 
-    class FriendTextChatItem(val text: String, val newMessage: EachMessage): Item<GroupieViewHolder>(){
+    class FriendTextChatItem(val text: String, val newMessage: EachMessage) :
+        Item<GroupieViewHolder>() {
         override fun getLayout(): Int = R.layout.friend_text_chat
 
         override fun bind(viewHolder: GroupieViewHolder, position: Int) {
@@ -447,7 +623,7 @@ class EachChatActivity : AppCompatActivity() {
             viewHolder.itemView.friends_text.text = text
 
 //            Timber.d("friend's image url is ${friendUser?.profilePictureUrl}")
-            if (friendUser?.profilePictureUrl != null){
+            if (friendUser?.profilePictureUrl != null) {
                 Glide.with(viewHolder.itemView.context)
                     .load(friendUser?.profilePictureUrl)
                     .into(friendImage)
@@ -457,7 +633,7 @@ class EachChatActivity : AppCompatActivity() {
         }
     }
 
-    class FriendImageChatItem(private val friendImageUrl: String): Item<GroupieViewHolder>(){
+    class FriendImageChatItem(private val friendImageUrl: String) : Item<GroupieViewHolder>() {
         override fun getLayout(): Int = R.layout.friend_image_chat
 
         override fun bind(viewHolder: GroupieViewHolder, position: Int) {
@@ -492,11 +668,13 @@ class EachChatActivity : AppCompatActivity() {
         val alertDialog = AlertDialog.Builder(this)
             .setTitle("Delete message")
             .setMessage("Are you sure you want to delete message from ${friendUser?.userName}")
-            .setPositiveButton("DELETE FOR ME") {_, _ ->
-                deleteFriendMessageForMe(myRef, latestMessagesFromRef, latestMessagesToRef)
-                listenForMessages()
+            .setPositiveButton("DELETE FOR ME") { _, _ ->
+                removeTextMessageFromAdapterForMe(myRef, latestMessagesFromRef)
+                returnItemToDefault()
             }
-            .setNegativeButton("CANCEL") {_,_ -> }
+            .setNegativeButton("CANCEL") { _, _ ->
+                returnItemToDefault()
+            }
             .create()
 
         alertDialog.show()
@@ -543,14 +721,16 @@ class EachChatActivity : AppCompatActivity() {
             .setTitle("Delete Message")
             .setMessage("Are you sure you want to delete this message")
             .setPositiveButton("DELETE FOR ME") { _, _ ->
-                deleteMyMessageForMe(myRef, latestMessagesFromRef, latestMessagesToRef)
-                listenForMessages()
+                removeTextMessageFromAdapterForMe(myRef, latestMessagesFromRef)
+                returnItemToDefault()
             }
-            .setNeutralButton("CANCEL") {_, _ -> }
-            .setNegativeButton("DELETE FOR EVERYONE") {_ ,_ ->
-                deleteMyMessageForMe(myRef, latestMessagesFromRef, latestMessagesToRef)
+            .setNeutralButton("CANCEL") { _, _ ->
+                returnItemToDefault()
+            }
+            .setNegativeButton("DELETE FOR EVERYONE") { _, _ ->
                 deleteMyMessageForFriend(toRef)
-                listenForMessages()
+                removeTextMessageFromAdapterForEveryone(myRef, latestMessagesFromRef)
+                returnItemToDefault()
             }
             .create()
 
@@ -576,32 +756,47 @@ class EachChatActivity : AppCompatActivity() {
                     }.addOnFailureListener {
                         Timber.e(it)
                     }
+//                (longPressMessage as MyTextChatItem).newMessage = toRefClassInternal!!
+                longPressMessage = null
             }
         })
     }
 
     private fun deleteMyMessageForMe(
         myRef: DatabaseReference,
-        latestMessagesFromRef: DatabaseReference,
-        latestMessagesToRef: DatabaseReference
+        latestMessagesFromRef: DatabaseReference
     ) {
-        var myRefClass: EachMessage?
-        myRef.addValueEventListener(object : ValueEventListener {
-            override fun onCancelled(error: DatabaseError) {
-                Timber.e(error.details)
+        myRef.child("textMessage").setValue("This message was deleted.")
+            .addOnSuccessListener {
+                Timber.d("Changed my ref successfully")
+            }
+            .addOnFailureListener {
+                Timber.e(it)
+            }
+        latestMessagesFromRef.child("textMessage").setValue("This message was deleted.")
+            .addOnSuccessListener {
+                Timber.d("Changed my latest messages ref successfully")
+            }
+            .addOnFailureListener {
+                Timber.e(it)
             }
 
-            override fun onDataChange(snapshot: DataSnapshot) {
-                myRefClass = snapshot.getValue(EachMessage::class.java)
-                myRefClass?.textMessage = "This message was deleted."
-                myRef.setValue(myRefClass).addOnSuccessListener {
-                    Timber.d("myRef change done")
-                }.addOnFailureListener {
-                    Timber.e(it)
-                }
-                latestMessagesFromRef.setValue(myRefClass)
-                latestMessagesToRef.setValue(myRefClass)
-            }
-        })
+//        myRef.addValueEventListener(object : ValueEventListener {
+//            override fun onCancelled(error: DatabaseError) {
+//                Timber.e(error.details)
+//            }
+//
+//            override fun onDataChange(snapshot: DataSnapshot) {
+//                myRefClass = snapshot.getValue(EachMessage::class.java)
+//                myRefClass?.textMessage = "This message was deleted."
+//                myRef.setValue(myRefClass).addOnSuccessListener {
+//                    Timber.d("myRef change done")
+//                }.addOnFailureListener {
+//                    Timber.e(it)
+//                }
+//                latestMessagesFromRef.setValue(myRefClass)
+////                latestMessagesToRef.setValue(myRefClass)
+//            }
+//        })
     }
 }
