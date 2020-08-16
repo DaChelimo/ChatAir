@@ -455,22 +455,41 @@ class EachChatActivity : AppCompatActivity() {
         val myTextChatItem = longPressMessage as MyTextChatItem
 
         try {
+
+            Timber.d("myTextChatItem.newMessage.textMessage is ${myTextChatItem.newMessage.textMessage}")
+            Timber.d("Everyone position is ${messagesList.indexOf(longPressMessage!!)}")
+            Timber.d("MessageList size is ${messagesList.size}")
+            Timber.d("Position of item in adapter is ${adapter.getAdapterPosition(longPressMessage!!)}")
+            Timber.d("longPressMessage is ${(longPressMessage as MyTextChatItem).newMessage}")
+
             if (myTextChatItem.newMessage.textMessage != "This message was deleted") {
                 myTextChatItem.newMessage.textMessage = "This message was deleted"
-
-                val position = messagesList.indexOf(longPressMessage!!)
-                messagesList[position] = myTextChatItem
-
-//            adapter.update(messagesList)
-                longPressMessage = myTextChatItem
-                adapter.notifyItemChanged(position)
-                longPressMessage = null
             }
+
+//                val position = messagesList.indexOf(longPressMessage!!)
+//                messagesList[adapter.getAdapterPosition(longPressMessage!!)] = myTextChatItem
+//
+//
+//                Timber.d("Success. messageList[position] with adapter.position is ${messagesList[adapter.getAdapterPosition(longPressMessage!!)]}")
+//
+//                adapter.update(messagesList)
+                longPressMessage = myTextChatItem
+            longPressMessage?.notifyChanged()
+                adapter.notifyItemChanged(adapter.getAdapterPosition(longPressMessage!!))
+
+            Timber.d("updated message is ${(adapter.getItem(adapter.getAdapterPosition(longPressMessage!!)) as MyTextChatItem).newMessage}")
+                longPressMessage = null
         }
         catch(e: ArrayIndexOutOfBoundsException){
             Timber.e(e)
             Timber.i("RemoveMessage for everyone did not work")
-            removeTextMessageFromAdapterForEveryone(myRef, latestMessagesFromRef)
+            if (numberRepeated <= 5) {
+                numberRepeated++
+                removeTextMessageFromAdapterForEveryone(myRef, latestMessagesFromRef)
+            }
+            else{
+                numberRepeated = 1
+            }
         }
     }
 
@@ -757,7 +776,7 @@ class EachChatActivity : AppCompatActivity() {
                         Timber.e(it)
                     }
 //                (longPressMessage as MyTextChatItem).newMessage = toRefClassInternal!!
-                longPressMessage = null
+//                longPressMessage = null
             }
         })
     }
