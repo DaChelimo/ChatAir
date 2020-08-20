@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:context=".CreateGroupDetailsActivity">
+
+        <ImageView
+            android:id="@+id/camera_background_image"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="16dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@drawable/camera_background" />
+
+        <ImageView
+            android:id="@+id/camera_image"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintBottom_toBottomOf="@+id/camera_background_image"
+            app:layout_constraintEnd_toEndOf="@+id/camera_background_image"
+            app:layout_constraintStart_toStartOf="@+id/camera_background_image"
+            app:layout_constraintTop_toTopOf="@+id/camera_background_image"
+            app:srcCompat="@drawable/ic_baseline_camera_alt_24" />
+
+        <EditText
+            android:id="@+id/create_group_details_name"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginEnd="32dp"
+            android:background="@drawable/create_group_details_edittext_background"
+            android:ems="10"
+            android:hint="Type group name here..."
+            android:inputType="textPersonName"
+            android:maxLength="25"
+            android:textSize="16sp"
+            app:layout_constraintBottom_toBottomOf="@+id/camera_background_image"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/camera_background_image"
+            app:layout_constraintTop_toTopOf="@+id/camera_background_image" />
+
+        <TextView
+            android:id="@+id/create_group_details_additional_details"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="Provide a group name and an optional group icon."
+            android:textSize="13sp"
+            app:layout_constraintStart_toStartOf="@+id/camera_background_image"
+            app:layout_constraintTop_toBottomOf="@+id/camera_background_image" />
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/accept_btn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="4dp"
+            android:clickable="true"
+            app:layout_constraintBottom_toTopOf="@+id/constraintLayout3"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/constraintLayout3"
+            app:srcCompat="@drawable/ic_baseline_check_24" />
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/constraintLayout3"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_marginTop="24dp"
+            android:background="#F3E6E6"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/create_group_details_additional_details">
+
+            <TextView
+                android:id="@+id/create_group_details_participants_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="12dp"
+                android:layout_marginTop="16dp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                tools:text="Participants: 3" />
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/create_group_details_participants_recyclerview"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_marginTop="16dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/create_group_details_participants_text" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <de.hdodenhof.circleimageview.CircleImageView
+            android:id="@+id/group_image"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:src="@drawable/ic_userprofile_person_24"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="@+id/camera_background_image"
+            app:layout_constraintEnd_toEndOf="@+id/camera_background_image"
+            app:layout_constraintStart_toStartOf="@+id/camera_background_image"
+            app:layout_constraintTop_toTopOf="@+id/camera_background_image"
+            tools:visibility="visible" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>

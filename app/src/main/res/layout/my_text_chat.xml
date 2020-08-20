@@ -31,4 +31,14 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/my_text_chat_image"
         app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/my_text_chat_time_stamp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="2dp"
+        android:textSize="10sp"
+        app:layout_constraintBottom_toBottomOf="@+id/my_text_chat_text"
+        app:layout_constraintEnd_toEndOf="@+id/my_text_chat_text"
+        tools:text="11:23" />
 </androidx.constraintlayout.widget.ConstraintLayout>

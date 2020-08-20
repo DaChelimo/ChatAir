@@ -1,7 +1,6 @@
 package com.example.messenger
 
 import android.content.Intent
-import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import androidx.databinding.DataBindingUtil
@@ -48,7 +47,7 @@ class NewUsersActivity : AppCompatActivity() {
 
             val user = item as UserItem
 
-            val intent = Intent(view.context, EachChatActivity::class.java)
+            val intent = Intent(view.context, EachPersonalChatActivity::class.java)
             intent.putExtra(USER_KEY, user.user)
             intent.putExtra(INTENT_URI, intentUri)
             Timber.i("item is $item.")

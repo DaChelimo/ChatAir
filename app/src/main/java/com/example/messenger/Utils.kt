@@ -1,17 +1,21 @@
 package com.example.messenger
 
+import android.content.Context
+import android.net.ConnectivityManager
+import android.os.Build
 import android.os.Parcelable
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.PhoneAuthProvider
-import com.google.firebase.database.DataSnapshot
-import com.google.firebase.database.DatabaseError
-import com.google.firebase.database.FirebaseDatabase
-import com.google.firebase.database.ValueEventListener
+import com.google.firebase.database.*
 import com.google.firebase.iid.FirebaseInstanceId
 import com.google.firebase.messaging.FirebaseMessaging
 import com.google.firebase.storage.FirebaseStorage
 import kotlinx.android.parcel.Parcelize
+import org.joda.time.LocalDate
 import timber.log.Timber
+import java.text.SimpleDateFormat
+import java.util.*
+import kotlin.collections.HashMap
 
 val firebaseAuth = FirebaseAuth.getInstance()
 val firebaseStorage = FirebaseStorage.getInstance() // for images
@@ -31,12 +35,105 @@ data class User(var userName: String, val uid: String, var profilePictureUrl: St
     constructor(): this("",  "", "", null, "")
 }
 
+@Parcelize
+data class UserActivity(val uid: String, var isOnline: Boolean, var lastSeen: Long): Parcelable {
+    constructor(): this("", false, -1)
+}
+
+fun changeUserActivityToOffline(){
+    val cm = mainContext?.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+    val activeNetwork = cm.activeNetworkInfo
+    val isConnected = activeNetwork?.isConnectedOrConnecting == true
+
+    Timber.d("isConnected is $isConnected")
+
+    if (firebaseAuth.uid != null){
+        val ref = firebaseDatabase.getReference("users-activity/${firebaseAuth.uid}")
+        val userActivity = UserActivity(firebaseAuth.uid.toString(), false, System.currentTimeMillis())
+
+        ref.setValue(userActivity)
+            .addOnSuccessListener {
+                Timber.d("Success changing activity.")
+            }
+            .addOnFailureListener {
+                Timber.e(it)
+            }
+    }
+    else{
+        Timber.i("firebaseUid is null")
+    }
+}
+
+fun changeUserActivityToOnline(){
+    val cm = mainContext?.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+    val activeNetwork = cm.activeNetworkInfo
+    val isConnected = activeNetwork?.isConnectedOrConnecting == true
+
+    Timber.d("isConnected is $isConnected")
+
+    if (firebaseAuth.uid != null){
+        val ref = firebaseDatabase.getReference("users-activity/${firebaseAuth.uid}")
+        val userActivity = UserActivity(firebaseAuth.uid.toString(), true, System.currentTimeMillis())
+
+        ref.setValue(userActivity)
+            .addOnSuccessListener {
+                Timber.d("Success changing activity.")
+            }
+            .addOnFailureListener {
+                Timber.e(it)
+            }
+    }
+    else{
+        Timber.i("firebaseUid is null")
+    }
+}
+
+
+// TODO: DO NOT TOUCH!!!!
+
+
+
+
+fun convertTimeToLastSeenTime(timeInMillis: Long): String {
+        val cleanTime = SimpleDateFormat("hh:mm", Locale.getDefault()).format(timeInMillis)
+
+        val isYesterday = LocalDate.now().minusDays(1).compareTo(LocalDate(timeInMillis)) == 0
+        val isToday = LocalDate.now().compareTo(LocalDate(timeInMillis)) == 0
+        val isThisWeek = LocalDate.now().weekyear.compareTo(LocalDate(timeInMillis).weekyear) == 0
+
+        Timber.d("day of week is ${LocalDate(timeInMillis).dayOfWeek().asShortText} and string is ${LocalDate(timeInMillis).dayOfWeek().asString} and and text is ${LocalDate(timeInMillis).dayOfWeek().asText}")
+
+        return when {
+            isToday -> {
+                "last seen today at $cleanTime"
+            }
+            isYesterday -> {
+                "last seen yesterday at $cleanTime"
+            }
+            isThisWeek -> {
+                "last seen on ${LocalDate(timeInMillis).dayOfWeek().asShortText} at $cleanTime"
+            }
+            else -> {
+                "last seen ${SimpleDateFormat("dd/mm/yyyy", Locale.getDefault()).format(timeInMillis)} at $cleanTime"
+            }
+        }
+}
+
 data class TokenClass(val userName: String, val uid: String, val token: String){
     constructor(): this("", "", "")
 }
 
+@Parcelize
+data class BasicGroupData(val groupIcon: String?, val groupName: String, val groupMembers: ArrayList<User>, val groupUid: String, val groupFormedTime: Long, val groupCreatedBy: String): Parcelable{
+    constructor(): this(null, "", arrayListOf(), "", -1, "")
+}
+
+data class GroupLatestMessage(val basicGroupData: BasicGroupData, val message: EachGroupMessage)
+
 data class NotificationBody(val title: String, val message: String)
 data class Notification(val to: String, val data: NotificationBody)
+
+data class FCMData(val to: String, val actualDataMap: HashMap<String, String?>)
 
 fun sendUserToToDatabase(token: String){
     Timber.d("Token: $token")
@@ -60,8 +157,86 @@ fun sendUserToToDatabase(token: String){
 const val USER_KEY = "USER_KEY"
 const val INTENT_URI = "INTENT_URI"
 const val FRIEND_USER_PROFILE = "FRIEND_USER_PROFILE"
+const val PARTICIPANTS_DATA = "PARTICIPANTS_DATA"
+const val GROUP_KEY = "GROUP_KEY"
+
+enum class TIME_FORMATS{SHOW_MINUTE, SHOW_DAY, SHOW_DATE}
+
+fun formatTimeForAdapter(timeInMillis: Long): String {
+    val locale = Locale.getDefault()
+    val currentDay = SimpleDateFormat("EEEE", locale).format(System.currentTimeMillis())
+    val givenDay = SimpleDateFormat("EEEE", Locale.getDefault()).format(timeInMillis)
+
+    val chosenTimeFormat: TIME_FORMATS = when (currentDay) {
+        givenDay -> TIME_FORMATS.SHOW_MINUTE
+        else -> TIME_FORMATS.SHOW_DATE
+    }
+
+    val formattedDate = if (chosenTimeFormat == TIME_FORMATS.SHOW_MINUTE){
+        SimpleDateFormat("hh:mm", locale).format(timeInMillis)
+    }
+    else{
+        SimpleDateFormat("dd/mm/yyyy", locale).format(timeInMillis)
+    }
+
+    Timber.d("Formatted date is $formattedDate")
+    return formattedDate
+}
+
+fun getAllUnreadMessages(toId: String?): Int {
+    val fromId = firebaseAuth.uid
+    val ref = firebaseDatabase.getReference("/user-messages/$fromId/$toId")
+
+    var totalUnread = 0
+    val messageMap : HashMap<String?, EachPersonalMessage?> = HashMap()
+
+    ref.addChildEventListener(object : ChildEventListener {
+        override fun onCancelled(error: DatabaseError) {}
+
+        override fun onChildMoved(snapshot: DataSnapshot, previousChildName: String?) {}
+
+        override fun onChildChanged(snapshot: DataSnapshot, previousChildName: String?) {
+            val eachPersonalMessage = snapshot.getValue(EachPersonalMessage::class.java)
+
+            messageMap[eachPersonalMessage?.id] = eachPersonalMessage
+            Timber.d("eachPersonalMessage?.wasRead is ${eachPersonalMessage?.wasRead}")
+        }
+
+        override fun onChildAdded(snapshot: DataSnapshot, previousChildName: String?) {
+            val eachPersonalMessage = snapshot.getValue(EachPersonalMessage::class.java)
+
+            messageMap[eachPersonalMessage?.id] = eachPersonalMessage
+            Timber.d("eachPersonalMessage?.wasRead is ${eachPersonalMessage?.wasRead}")
+        }
+
+        override fun onChildRemoved(snapshot: DataSnapshot) {}
+    })
+
+    messageMap.values.forEach {
+        if (it != null){
+            if (!it.wasRead) totalUnread++ else Timber.d("Was read is ${it.wasRead}")
+        }
+    }
+
+    return totalUnread
+}
+
+fun convertTimeStampToAdapterTime(timeInMillis: Long): String {
+    val locale = Locale.getDefault()
+    val convertedTime = SimpleDateFormat("hh:mm", locale).format(timeInMillis)
+    Timber.d("converted time is $convertedTime")
+
+    return convertedTime
+}
 
 @Parcelize
-data class EachMessage(val id: String, val fromId: String, val toId: String, val imageUrl: String?, var textMessage: String, val timeStamp: Long, val username: String, val profilePictureUrl: String, val receiverAccount: User?, val senderAccount: User?): Parcelable{
-    constructor(): this("", "", "", null, "", -1, "", "", null, null)
+data class EachPersonalMessage(var id: String, val fromId: String, val toId: String, val imageUrl: String?, var textMessage: String, val timeStamp: Long, val username: String, val profilePictureUrl: String, val receiverAccount: User?, val senderAccount: User?, var wasRead: Boolean): Parcelable{
+    constructor(): this("", "", "", null, "", -1, "", "", null, null, false)
 }
+
+@Parcelize
+data class EachGroupMessage(var id: String, val fromId: String, val imageUrl: String?, var textMessage: String, val timeStamp: Long, val username: String, val profilePictureUrl: String, val receiverAccounts: ArrayList<User>, val senderAccount: User?, val wasRead: Boolean): Parcelable{
+    constructor(): this("", "", null, "", -1, "", "", arrayListOf<User>(), null, false)
+}
+
+var mainContext: Context? = null

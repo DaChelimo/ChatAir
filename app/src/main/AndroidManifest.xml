@@ -2,6 +2,16 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.messenger">
 
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-feature
+        android:name="android.hardware.microphone"
+        android:required="false"/>
+
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.RECORD_AUDIO"/>
+    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS"/>
+    <uses-permission android:name="android.permission.READ_PHONE_STATE"/>
+
     <application
         android:name=".MainApplication"
         android:allowBackup="true"
@@ -10,21 +20,27 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-
+        <activity android:name=".GroupProfileActivity"></activity>
+        <activity
+            android:name=".EachGroupChatActivity"
+            android:theme="@style/NoActionBar" />
+        <activity
+            android:name=".CreateGroupDetailsActivity"
+            android:parentActivityName=".CreateGroupActivity" />
+        <activity
+            android:name=".CreateGroupActivity"
+            android:parentActivityName=".LatestMessagesActivity" />
         <activity
             android:name=".OthersProfileActivity"
-            android:theme="@style/NoActionBar"/>
-
+            android:theme="@style/NoActionBar" />
         <activity
             android:name=".UserProfileActivity"
             android:parentActivityName=".LatestMessagesActivity"
             android:theme="@style/NoActionBar" />
-
         <activity
-            android:name=".EachChatActivity"
+            android:name=".EachPersonalChatActivity"
             android:parentActivityName=".LatestMessagesActivity"
             android:theme="@style/NoActionBar" />
-
         <activity
             android:name=".NewUsersActivity"
             android:parentActivityName=".LatestMessagesActivity">

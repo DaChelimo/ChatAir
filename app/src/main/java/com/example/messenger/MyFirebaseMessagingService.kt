@@ -26,14 +26,15 @@ class MyFirebaseMessagingService: FirebaseMessagingService() {
         // Not getting messages here? See why this may be: https://goo.gl/39bRNJ
         Timber.d("From: ${remoteMessage.from}")
 
+        Timber.d("remoteMessage.data is ${remoteMessage.data} and notification is ${remoteMessage.notification}")
         // Check if message contains a data payload.
         remoteMessage.data.isNotEmpty().let {
             Timber.d("Message data payload: %s", remoteMessage.data)
-            Timber.d("title is ${remoteMessage.data["title"].toString()} and msg is ${remoteMessage.data["message"].toString()}")
+            Timber.d("title is ${remoteMessage.data["sendersName"].toString()} and msg is ${remoteMessage.data["message"].toString()}")
 
             // Compose and show notification
             if (!remoteMessage.data.isNullOrEmpty()) {
-                val title : String = remoteMessage.data["title"].toString()
+                val title : String = remoteMessage.data["sendersName"].toString()
                 val msg: String = remoteMessage.data["message"].toString()
                 sendNotification(title, msg)
             }

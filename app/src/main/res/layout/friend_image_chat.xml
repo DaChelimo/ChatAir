@@ -30,4 +30,14 @@
         app:layout_constraintTop_toTopOf="@+id/image_friends_profile_picture"
         tools:src="@tools:sample/backgrounds/scenic" />
 
+    <TextView
+        android:id="@+id/image_friends_time_stamp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="#FFF"
+        android:textSize="10sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="@+id/image_friends_image"
+        tools:text="22:05" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>

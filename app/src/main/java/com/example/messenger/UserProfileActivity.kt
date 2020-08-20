@@ -41,7 +41,7 @@ class UserProfileActivity : AppCompatActivity() {
 
         toolbar.setNavigationOnClickListener {
             if (intent?.data != null) {
-                val navIntent = Intent(this, EachChatActivity::class.java)
+                val navIntent = Intent(this, EachPersonalChatActivity::class.java)
                 startActivity(navIntent)
                 finish()
             }
@@ -211,6 +211,7 @@ class UserProfileActivity : AppCompatActivity() {
     }
 
     private fun signOutUser(){
+        changeUserActivityToOffline()
         firebaseAuth.signOut()
         val intent = Intent(this, RegisterActivity::class.java)
         intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TASK.or(Intent.FLAG_ACTIVITY_NEW_TASK)

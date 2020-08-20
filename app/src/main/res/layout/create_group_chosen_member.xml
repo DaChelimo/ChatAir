@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:padding="12dp"
+    android:paddingTop="4dp"
+    android:paddingBottom="4dp">
+
+    <de.hdodenhof.circleimageview.CircleImageView
+        android:id="@+id/chosen_member_image"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:paddingBottom="2dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:srcCompat="@drawable/ic_userprofile_person_24" />
+
+    <TextView
+        android:id="@+id/chosen_member_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:paddingTop="2dp"
+        app:layout_constraintEnd_toEndOf="@+id/chosen_member_image"
+        app:layout_constraintStart_toStartOf="@+id/chosen_member_image"
+        app:layout_constraintTop_toBottomOf="@+id/chosen_member_image"
+        tools:text="Benja Bush" />
+</androidx.constraintlayout.widget.ConstraintLayout>

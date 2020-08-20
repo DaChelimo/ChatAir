@@ -12,6 +12,8 @@
           <set>
             <option value="$PROJECT_DIR$" />
             <option value="$PROJECT_DIR$/app" />
+            <option value="$PROJECT_DIR$/sinch-android-rtc-3.17.4" />
+            <option value="$PROJECT_DIR$/sinch-android-rtc-3.17.4-aar" />
           </set>
         </option>
         <option name="resolveModulePerSourceSet" value="false" />

@@ -48,9 +48,9 @@ interface ApiService {
     // @Header("Content-Type") contentType: String = CONTENT_TYPE
     @POST("fcm/send")
     fun sendNotificationInApi(
-        @Body notification: Notification,
+        @Body notification: FCMData,
         @Header("Content-Type") contentType: String = CONTENT_TYPE
-    ): Call<Notification>
+    ): Call<FCMData>
 }
 
 object RetrofitItem {

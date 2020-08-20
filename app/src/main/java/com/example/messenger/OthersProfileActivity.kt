@@ -40,7 +40,7 @@ class OthersProfileActivity : AppCompatActivity() {
         binding.otherProfileToolbarBackBtn.setOnClickListener {
             it.background = resources.getDrawable(R.drawable.other_profile_back_onclick)
             Timber.d("Above navigation")
-            val intent = Intent(this, EachChatActivity::class.java)
+            val intent = Intent(this, EachPersonalChatActivity::class.java)
             intent.putExtra(USER_KEY, friendUser)
             Timber.d("Navigation called")
             startActivity(intent)
