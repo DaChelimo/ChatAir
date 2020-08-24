@@ -69,6 +69,8 @@ class MyFirebaseMessagingService: FirebaseMessagingService() {
         // https://developer.android.com/training/notify-user/build-notification#Priority
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val channel = NotificationChannel(channelId, "Receive notifications on incoming messages.", NotificationManager.IMPORTANCE_HIGH)
+            channel.enableLights(true)
+            channel.enableVibration(true)
             notificationManager.createNotificationChannel(channel)
         }
         notificationManager.notify(0, notificationBuilder.build())

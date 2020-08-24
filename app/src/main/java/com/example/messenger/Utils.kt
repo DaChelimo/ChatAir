@@ -2,7 +2,6 @@ package com.example.messenger
 
 import android.content.Context
 import android.net.ConnectivityManager
-import android.os.Build
 import android.os.Parcelable
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.PhoneAuthProvider
@@ -133,7 +132,7 @@ data class GroupLatestMessage(val basicGroupData: BasicGroupData, val message: E
 data class NotificationBody(val title: String, val message: String)
 data class Notification(val to: String, val data: NotificationBody)
 
-data class FCMData(val to: String, val actualDataMap: HashMap<String, String?>)
+data class FCMData(val to: String, val actualDataMap: DataMap)
 
 fun sendUserToToDatabase(token: String){
     Timber.d("Token: $token")
@@ -176,7 +175,7 @@ fun formatTimeForAdapter(timeInMillis: Long): String {
         SimpleDateFormat("hh:mm", locale).format(timeInMillis)
     }
     else{
-        SimpleDateFormat("dd/mm/yyyy", locale).format(timeInMillis)
+        SimpleDateFormat("dd/MM/yyyy", locale).format(timeInMillis)
     }
 
     Timber.d("Formatted date is $formattedDate")
@@ -228,6 +227,8 @@ fun convertTimeStampToAdapterTime(timeInMillis: Long): String {
 
     return convertedTime
 }
+
+data class DataMap(var sendersName: String, var message: String)
 
 @Parcelize
 data class EachPersonalMessage(var id: String, val fromId: String, val toId: String, val imageUrl: String?, var textMessage: String, val timeStamp: Long, val username: String, val profilePictureUrl: String, val receiverAccount: User?, val senderAccount: User?, var wasRead: Boolean): Parcelable{

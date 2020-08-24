@@ -155,6 +155,17 @@ class EachGroupChatActivity : AppCompatActivity() {
         }
     }
 
+    override fun onBackPressed() {
+        if (basicGroupData != null){
+            val intent = Intent(this, LatestMessagesActivity::class.java)
+            startActivity(intent)
+            finishAffinity()
+        }
+        else{
+            super.onBackPressed()
+        }
+    }
+
     private fun setToolbarData() {
         val toolbar = binding.eachGroupChatToolbar
         binding.groupToolbarName.text = basicGroupData?.groupName
@@ -163,7 +174,9 @@ class EachGroupChatActivity : AppCompatActivity() {
             .into(binding.groupToolbarImage)
 
         binding.groupBackButton.setOnClickListener {
-            finish()
+            val intent = Intent(this, LatestMessagesActivity::class.java)
+            startActivity(intent)
+            finishAffinity()
         }
 
         binding.groupToolbarConstraint.setOnClickListener {
@@ -259,7 +272,6 @@ class EachGroupChatActivity : AppCompatActivity() {
     private fun composeNotification() {
         Timber.d("composeNotification called")
 
-        val dataMap = HashMap<String, String?>()
         if (myAccount?.userName == null) return
 
         val groupUid = basicGroupData?.groupUid
@@ -273,12 +285,11 @@ class EachGroupChatActivity : AppCompatActivity() {
             override fun onDataChange(snapshot: DataSnapshot) {
                 val lastMessage = snapshot.getValue(EachGroupMessage::class.java) ?: return
 
-                dataMap["sendersName"] = myAccount?.userName
-                dataMap["message"] = lastMessage.textMessage
-
                 basicGroupData?.groupMembers?.forEach {
                     if (it.uid != firebaseAuth.uid) {
                         val topic = "/topics/${it.uid}"
+
+                        val dataMap = DataMap(myAccount?.userName!!, lastMessage.textMessage)
 
 //                        notificationBody =
 //                            NotificationBody(basicGroupData?.groupName.toString() , "${lastMessage.senderAccount?.userName}: ${lastMessage.textMessage}")

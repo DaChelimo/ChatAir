@@ -169,6 +169,7 @@ class LatestMessagesActivity : AppCompatActivity() {
             override fun onChildChanged(snapshot: DataSnapshot, previousChildName: String?) {
 //                listenForLatestMessages()
                 val updatedChatMessage = snapshot.getValue(EachPersonalMessage::class.java) ?: return
+                if (updatedChatMessage.id.isEmpty()) return
 
                 if (updatedChatMessage.fromId == firebaseAuth.uid && updatedChatMessage.toId == firebaseAuth.uid){
                     Timber.d("Same account in latest activity")
@@ -182,7 +183,9 @@ class LatestMessagesActivity : AppCompatActivity() {
             override fun onChildAdded(snapshot: DataSnapshot, previousChildName: String?) {
 
                 val chatMessage = snapshot.getValue(EachPersonalMessage::class.java) ?: return
+                if (chatMessage.id.isEmpty()) return
 
+                Timber.d("Latest message item is ${chatMessage}")
                 if (chatMessage.fromId == firebaseAuth.uid && chatMessage.toId == firebaseAuth.uid){
                     Timber.d("Same account in latest activity")
                 }

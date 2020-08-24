@@ -1,7 +1,10 @@
 package com.example.messenger
 
 import android.app.Activity
-import android.content.*
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
+import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import android.view.inputmethod.InputMethodManager
@@ -15,8 +18,6 @@ import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.ValueEventListener
-import com.google.firebase.messaging.RemoteMessage
-import com.sinch.android.rtc.Sinch
 import com.xwray.groupie.GroupAdapter
 import com.xwray.groupie.GroupieViewHolder
 import com.xwray.groupie.Item
@@ -30,7 +31,6 @@ import retrofit2.Response
 import timber.log.Timber
 import java.util.*
 import kotlin.collections.ArrayList
-import kotlin.collections.HashMap
 
 class EachPersonalChatActivity : AppCompatActivity() {
 
@@ -338,11 +338,8 @@ class EachPersonalChatActivity : AppCompatActivity() {
             override fun onDataChange(snapshot: DataSnapshot) {
                 val lastMessage = snapshot.getValue(EachPersonalMessage::class.java) ?: return
 
-                val dataMap = HashMap<String, String?>()
                 if (myAccount?.userName == null) return
-
-                dataMap["sendersName"] = myAccount?.userName
-                dataMap["message"] = lastMessage.textMessage
+                val dataMap = DataMap(myAccount?.userName!!, lastMessage.textMessage)
 
 //                notificationBody = NotificationBody(myAccount?.userName!!, lastMessage.textMessage)
 //                notificationBody?.let {
