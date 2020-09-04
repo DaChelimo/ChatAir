@@ -1,3 +1,9 @@
 <resources>
     <string name="app_name">Messenger</string>
+
+    <string name="agora_app_id">00ee5fd1daf84779948313f49d0a55bc</string>
+    <!-- Obtain a temp Access Token at https://dashboard.agora.io -->
+    <!-- You will need to deploy your own token server for production release -->
+    <!-- Leave this value empty if Security keys/Token is not enabled for your project -->
+    <string name="agora_access_token" />
 </resources>

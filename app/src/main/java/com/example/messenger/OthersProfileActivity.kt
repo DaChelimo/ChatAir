@@ -44,8 +44,16 @@ class OthersProfileActivity : AppCompatActivity() {
             intent.putExtra(USER_KEY, friendUser)
             Timber.d("Navigation called")
             startActivity(intent)
-            finish()
+            finishAffinity()
         }
+    }
+
+    override fun onBackPressed() {
+        val intent = Intent(this, EachPersonalChatActivity::class.java)
+        intent.putExtra(USER_KEY, friendUser)
+        Timber.d("Navigation called")
+        startActivity(intent)
+        finishAffinity()
     }
 
     fun loadData(user: User){

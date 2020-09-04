@@ -43,12 +43,12 @@ class UserProfileActivity : AppCompatActivity() {
             if (intent?.data != null) {
                 val navIntent = Intent(this, EachPersonalChatActivity::class.java)
                 startActivity(navIntent)
-                finish()
+                finishAffinity()
             }
             else{
                 val navIntent = Intent(this, LatestMessagesActivity::class.java)
                 startActivity(navIntent)
-                finish()
+                finishAffinity()
             }
         }
 
@@ -64,6 +64,12 @@ class UserProfileActivity : AppCompatActivity() {
             resetData(myAccount!!)
         }
 
+    }
+
+    override fun onBackPressed() {
+        val navIntent = Intent(this, LatestMessagesActivity::class.java)
+        startActivity(navIntent)
+        finishAffinity()
     }
 
     fun loadData(user: User){

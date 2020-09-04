@@ -1,14 +1,23 @@
 package com.example.messenger
 
+import android.app.AlertDialog
 import android.content.Intent
 import android.os.Bundle
+import android.view.LayoutInflater
+import android.widget.Button
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
+import com.bigbangbutton.editcodeview.EditCodeView
 import com.example.messenger.databinding.ActivityLoginBinding
 import com.google.firebase.FirebaseException
 import com.google.firebase.auth.PhoneAuthCredential
 import com.google.firebase.auth.PhoneAuthProvider
+import kotlinx.android.synthetic.main.activity_register.*
+import kotlinx.android.synthetic.main.activity_register.view.*
+import kotlinx.android.synthetic.main.enter_code_layout.*
+import kotlinx.android.synthetic.main.enter_code_layout.view.*
+import kotlinx.android.synthetic.main.enter_code_layout.view.enter_code_input
 import timber.log.Timber
 import java.util.concurrent.TimeUnit
 
@@ -32,19 +41,7 @@ class LoginActivity : AppCompatActivity() {
 
             firebasePhoneAuth.verifyPhoneNumber(email.text.toString(), 60, TimeUnit.SECONDS, this, object : PhoneAuthProvider.OnVerificationStateChangedCallbacks(){
                 override fun onVerificationCompleted(credential: PhoneAuthCredential) {
-                    firebaseAuth.signInWithCredential(credential)
-                        .addOnSuccessListener {
-                            Timber.i("Success. Login: firebaseAuth.signInWithCredential(credential) and uid is ${it.user?.uid}")
-                            val intent = Intent(this@LoginActivity, LatestMessagesActivity::class.java)
-                            intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TASK.or(Intent.FLAG_ACTIVITY_NEW_TASK)
-                            startActivity(intent)
-                        }
-                        .addOnFailureListener {
-                            Timber.e(it)
-                            Timber.e("error message: ${it.message}")
-                            Timber.e("error cause: ${it.cause}")
-//                            Toast.makeText(this, "")
-                        }
+                    signInWithCredential(credential)
                 }
 
                 override fun onVerificationFailed(it: FirebaseException) {
@@ -62,29 +59,62 @@ class LoginActivity : AppCompatActivity() {
                 }
             })
 
-            // firebasePhoneAuth.verifyPhoneNumber(emailText, 60, TimeUnit.SECONDS, this, object: PhoneAuthProvider.OnVerificationStateChangedCallbacks()
-
-//            firebaseAuth.signInWithEmailAndPassword(email.text.toString(), password.text.toString())
-//                .addOnSuccessListener {
-//                    Timber.i("Email is ${email.text} and password is ${password.text}")
-//                    val intent = Intent(this, LatestMessagesActivity::class.java)
-//                    intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TASK.or(Intent.FLAG_ACTIVITY_NEW_TASK)
-//                    startActivity(intent)
-//                }
-//                .addOnFailureListener {
-//                    Timber.e(it)
-//                    when (it.message) {
-//                        "There is no user record corresponding to this identifier. The user may have been deleted." -> {
-//                            Toast.makeText(applicationContext, "An account with this email does not exist", Toast.LENGTH_LONG).show()
-//                        }
-//                        "The password is invalid or the user does not have a password." -> {
-//                            Toast.makeText(applicationContext, "Invalid password. Try again.", Toast.LENGTH_LONG).show()
-//                        }
-//                        else -> {
-//                            Toast.makeText(applicationContext, "Unknown error.", Toast.LENGTH_LONG).show()
-//                        }
-//                    }
-//                }
         }
+
+        binding.loginEnterCodeBtn.setOnClickListener {
+            if(storedVerificationId == null){
+                Toast.makeText(this, "You must first sign up to receive code.", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
+
+            val dialogView = layoutInflater.inflate(R.layout.enter_code_layout, null) //from(this).inflate(R.layout.enter_code_layout, null)
+
+            val alert = AlertDialog.Builder(this)
+                .setView(dialogView)
+
+            val enterCodeBtn: Button = dialogView.findViewById(R.id.enter_code_submit_btn)
+            val cancelBtn: Button = dialogView.findViewById(R.id.enter_code_cancel_btn)
+            val inputCode: EditCodeView = dialogView.findViewById(R.id.enter_code_input)
+
+            alert.setCancelable(true)
+            val customAlert = alert.create()
+            customAlert.show()
+
+            enterCodeBtn.setOnClickListener {
+                if(inputCode.codeLength != 6){
+                    Toast.makeText(this, "Code is invalid. Try again", Toast.LENGTH_SHORT).show()
+                    Timber.d("Code is too short")
+                    inputCode.clearCode()
+                }
+                else{
+                    Toast.makeText(this, "Code is being processed.", Toast.LENGTH_SHORT).show()
+                    val credential = PhoneAuthProvider.getCredential(storedVerificationId!!, inputCode.code)
+                    signInWithCredential(credential)
+                    customAlert.dismiss()
+                }
+            }
+
+            cancelBtn.setOnClickListener {
+                customAlert.dismiss()
+            }
+
+        }
+    }
+
+    private fun signInWithCredential(credential: PhoneAuthCredential) {
+        firebaseAuth.signInWithCredential(credential)
+            .addOnSuccessListener {
+                Timber.i("Success. Login: firebaseAuth.signInWithCredential(credential) and uid is ${it.user?.uid}")
+                val intent = Intent(this@LoginActivity, LatestMessagesActivity::class.java)
+                intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TASK.or(Intent.FLAG_ACTIVITY_NEW_TASK)
+                startActivity(intent)
+            }
+            .addOnFailureListener {
+                Timber.e(it)
+                Timber.e("error message: ${it.message}")
+                Timber.e("error cause: ${it.cause}")
+    //                            Toast.makeText(this, "")
+            }
     }
 }

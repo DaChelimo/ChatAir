@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+  <data>
+
+  </data>
+
+  <androidx.constraintlayout.widget.ConstraintLayout
+      android:layout_width="match_parent"
+      android:layout_height="match_parent"
+      tools:context=".PersonalVoiceCallActivity">
+
+    <ImageView
+        android:id="@+id/voice_call_top_background"
+        android:layout_width="0dp"
+        android:layout_height="180dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/blue_personal_call_background" />
+
+    <TextView
+        android:id="@+id/voice_call_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:fontFamily="@font/roboto"
+        android:textColor="#FFF"
+        android:textSize="30sp"
+        app:layout_constraintBottom_toBottomOf="@+id/voice_call_top_background"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:text="Manman Home" />
+
+    <TextView
+        android:id="@+id/end_to_end_encrypted_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="End-to-end encrypted"
+        android:textColor="#FFF"
+        android:textSize="18sp"
+        app:layout_constraintBottom_toTopOf="@+id/voice_call_name"
+        app:layout_constraintEnd_toEndOf="@+id/voice_call_name"
+        app:layout_constraintStart_toStartOf="@+id/voice_call_name"
+        app:layout_constraintTop_toTopOf="@+id/voice_call_top_background" />
+
+    <TextView
+        android:id="@+id/voice_call_state"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Calling"
+        android:textColor="#FFF"
+        android:textSize="18sp"
+        app:layout_constraintBottom_toBottomOf="@+id/voice_call_top_background"
+        app:layout_constraintEnd_toEndOf="@+id/voice_call_name"
+        app:layout_constraintStart_toStartOf="@+id/voice_call_name"
+        app:layout_constraintTop_toBottomOf="@+id/voice_call_name" />
+
+    <ImageView
+        android:id="@+id/voice_call_user_image"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toTopOf="@+id/voice_call_bottom_background"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/voice_call_top_background"
+        app:srcCompat="@drawable/ic_userprofile_person_24" />
+
+    <ImageView
+        android:id="@+id/voice_call_bottom_background"
+        android:layout_width="0dp"
+        android:layout_height="80dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:srcCompat="@drawable/blue_personal_call_background" />
+
+    <ImageView
+        android:id="@+id/voice_call_use_speaker"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/voice_call_video_vtn"
+        app:layout_constraintHorizontal_bias="0.53"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/voice_call_user_image"
+        app:srcCompat="@drawable/ic_baseline_volume_up_24" />
+
+    <ImageView
+        android:id="@+id/voice_call_video_vtn"
+        android:layout_width="36dp"
+        android:layout_height="32dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/voice_call_mute_mic"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toEndOf="@+id/voice_call_use_speaker"
+        app:layout_constraintTop_toBottomOf="@+id/voice_call_user_image"
+        app:srcCompat="@drawable/ic_baseline_videocam_24" />
+
+    <ImageView
+        android:id="@+id/voice_call_mute_mic"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.50"
+        app:layout_constraintStart_toEndOf="@+id/voice_call_video_vtn"
+        app:layout_constraintTop_toBottomOf="@+id/voice_call_user_image"
+        app:srcCompat="@drawable/ic_baseline_mic_off_24" />
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/voice_call_hang_up"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="32dp"
+        android:background="#F40606"
+        android:clickable="true"
+        app:layout_constraintBottom_toBottomOf="@+id/voice_call_user_image"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:srcCompat="@drawable/ic_baseline_call_end_24"
+        android:src="@drawable/ic_baseline_call_end_24" />
+  </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>

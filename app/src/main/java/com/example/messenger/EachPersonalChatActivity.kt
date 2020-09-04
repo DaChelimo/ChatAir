@@ -163,6 +163,24 @@ class EachPersonalChatActivity : AppCompatActivity() {
             returnItemToDefault()
             setToolbarData()
         }
+
+        binding.personalVoiceCallBtn.setOnClickListener {
+            val intent = Intent(this, PersonalVoiceCallActivity::class.java)
+            intent.putExtra(VOICE_CALL_USER, friendUser)
+            startActivity(intent)
+        }
+
+        binding.personalVideoCallBtn.setOnClickListener {
+            val intent = Intent(this, PersonalVideoCallActivity::class.java)
+//            intent.putExtra(VOICE_CALL_USER, friendUser)
+            startActivity(intent)
+        }
+    }
+
+    override fun onBackPressed() {
+        val intent =  Intent(this, LatestMessagesActivity::class.java)
+        startActivity(intent)
+        finishAffinity()
     }
 
     private fun setToolbarData() {
@@ -173,7 +191,9 @@ class EachPersonalChatActivity : AppCompatActivity() {
             .into(binding.toolbarImage)
 
         binding.personalBackButton.setOnClickListener {
-            finish()
+            val intent =  Intent(this, LatestMessagesActivity::class.java)
+            startActivity(intent)
+            finishAffinity()
         }
 
         binding.toolbarLastSeen.text = "Offline"
@@ -656,7 +676,7 @@ class EachPersonalChatActivity : AppCompatActivity() {
 
         override fun bind(viewHolder: GroupieViewHolder, position: Int) {
             val layout = viewHolder.itemView
-            layout.my_text_chat_text.text = text
+            layout.my_text_chat_text.text = newPersonalMessage.textMessage
             layout.my_text_chat_time_stamp.text = convertTimeStampToAdapterTime(newPersonalMessage.timeStamp)
 
             val myImage = layout.my_text_chat_image

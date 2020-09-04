@@ -29,6 +29,10 @@ var resendingToken: PhoneAuthProvider.ForceResendingToken? = null
 const val TOO_SHORT_MESSAGE = "The format of the phone number provided is incorrect. Please enter the phone number in a format that can be parsed into E.164 format. E.164 phone numbers are written in the format [+][country code][subscriber number including area code]. [ TOO_SHORT ]"
 const val INVALID_FORMAT_MESSAGE = "The format of the phone number provided is incorrect. Please enter the phone number in a format that can be parsed into E.164 format. E.164 phone numbers are written in the format [+][country code][subscriber number including area code]. [ Invalid format. ]"
 
+const val VOICE_CALL_USER = "VOICE_CALL_USER"
+const val APPLICATION_KEY = "9a4edf60-85ec-4f50-9b25-d1e2f5ba27f9"
+const val APPLICATION_SECRET = "2CkEH85ZGUioHyQok7Nzpw=="
+
 @Parcelize
 data class User(var userName: String, val uid: String, var profilePictureUrl: String, var aboutDescription: String?, val phoneNumber: String): Parcelable{
     constructor(): this("",  "", "", null, "")
@@ -52,7 +56,7 @@ fun changeUserActivityToOffline(){
 
         ref.setValue(userActivity)
             .addOnSuccessListener {
-                Timber.d("Success changing activity.")
+                Timber.d("Success changing activity to offline.")
             }
             .addOnFailureListener {
                 Timber.e(it)
@@ -76,7 +80,7 @@ fun changeUserActivityToOnline(){
 
         ref.setValue(userActivity)
             .addOnSuccessListener {
-                Timber.d("Success changing activity.")
+                Timber.d("Success changing activity to online.")
             }
             .addOnFailureListener {
                 Timber.e(it)
@@ -90,7 +94,21 @@ fun changeUserActivityToOnline(){
 
 // TODO: DO NOT TOUCH!!!!
 
+fun formatCallTime(inputSeconds: Long): String{
+    val hours = inputSeconds / 3600
+    val minutes = (inputSeconds % 3600) /60
+    val seconds = inputSeconds % 60
+    val zero = 0L
 
+    val formattedTime = when {
+        hours != zero -> "$hours:$minutes:$seconds"
+        else -> "$minutes:$seconds"
+    }
+
+    Timber.d("formatted time is $formattedTime")
+
+    return formattedTime
+}
 
 
 fun convertTimeToLastSeenTime(timeInMillis: Long): String {

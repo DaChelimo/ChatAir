@@ -1,20 +1,31 @@
 package com.example.messenger
 
 import android.app.Activity
+import android.app.AlertDialog
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.os.CountDownTimer
+import android.view.LayoutInflater
 import android.view.View
 import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.AlertDialogLayout
 import androidx.databinding.DataBindingUtil
+import com.bigbangbutton.editcodeview.EditCodeView
 import com.bumptech.glide.Glide
 import com.example.messenger.databinding.ActivityRegisterBinding
 import com.google.firebase.FirebaseException
 import com.google.firebase.auth.PhoneAuthCredential
 import com.google.firebase.auth.PhoneAuthProvider
+import kotlinx.android.synthetic.main.activity_register.*
+import kotlinx.android.synthetic.main.activity_register.view.*
+import kotlinx.android.synthetic.main.activity_register.view.enter_code_btn
+import kotlinx.android.synthetic.main.enter_code_layout.*
+import kotlinx.android.synthetic.main.enter_code_layout.view.*
+import kotlinx.android.synthetic.main.enter_code_layout.view.enter_code_input
 import timber.log.Timber
 import java.util.*
 import java.util.concurrent.TimeUnit
@@ -62,6 +73,48 @@ class RegisterActivity : AppCompatActivity() {
         registerBtn.setOnClickListener {
             doRegister()
         }
+
+        binding.enterCodeBtn.setOnClickListener {
+            if (storedVerificationId == null) {
+                Toast.makeText(this, "You must first sign up to receive code.", Toast.LENGTH_SHORT)
+                    .show()
+                return@setOnClickListener
+            }
+
+            val dialogView = layoutInflater.inflate(
+                R.layout.enter_code_layout,
+                null
+            )
+
+            val alert = AlertDialog.Builder(this)
+                .setView(dialogView)
+
+            val enterCodeBtn: Button = dialogView.findViewById(R.id.enter_code_submit_btn)
+            val cancelBtn: Button = dialogView.findViewById(R.id.enter_code_cancel_btn)
+            val inputCode: EditCodeView = dialogView.findViewById(R.id.enter_code_input)
+
+            alert.setCancelable(true)
+            val customAlert = alert.create()
+            customAlert.show()
+
+            enterCodeBtn.setOnClickListener {
+                if (inputCode.codeLength != 6) {
+                    Toast.makeText(this, "Code is invalid. Try again", Toast.LENGTH_SHORT).show()
+                    Timber.d("Code is too short")
+                    inputCode.clearCode()
+                } else {
+                    Toast.makeText(this, "Code is being processed.", Toast.LENGTH_SHORT).show()
+                    val credential =
+                        PhoneAuthProvider.getCredential(storedVerificationId!!, inputCode.code)
+                    signInWithCredential(credential)
+                    customAlert.dismiss()
+                }
+            }
+
+            cancelBtn.setOnClickListener {
+                customAlert.dismiss()
+            }
+        }
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -94,21 +147,7 @@ class RegisterActivity : AppCompatActivity() {
 
         firebasePhoneAuth.verifyPhoneNumber(emailText, 60, TimeUnit.SECONDS, this, object: PhoneAuthProvider.OnVerificationStateChangedCallbacks() {
             override fun onVerificationCompleted(credential: PhoneAuthCredential) {
-                firebaseAuth.signInWithCredential(credential)
-                    .addOnSuccessListener {
-                        Timber.d("Success.")
-                        val displayName = it.user?.displayName
-                        Timber.i("firebaseAuth.currentUser?.displayName is ${firebaseAuth.currentUser?.displayName} and it.user?.displayName is ${it.user?.displayName}")
-                        val uid = it.user?.uid
-                        Timber.i("firebaseAuth.uid is ${firebaseAuth.uid} and it.user?.uid is ${it.user?.uid}")
-                        Timber.i("displayName is $displayName and uid is $uid")
-                        uploadImageToFireStoreStorage()
-                        Toast.makeText(this@RegisterActivity, "Success. You have signed up.", Toast.LENGTH_SHORT).show()
-                    }
-                    .addOnFailureListener {
-                        Timber.e(it)
-                        Toast.makeText(this@RegisterActivity, "Error occurred.", Toast.LENGTH_SHORT).show()
-                    }
+                signInWithCredential(credential)
             }
 
             override fun onCodeSent(verificationId: String, token: PhoneAuthProvider.ForceResendingToken) {
@@ -120,6 +159,28 @@ class RegisterActivity : AppCompatActivity() {
                 Timber.e(error)
             }
         })
+    }
+
+    private fun signInWithCredential(credential: PhoneAuthCredential) {
+        firebaseAuth.signInWithCredential(credential)
+            .addOnSuccessListener {
+                Timber.d("Success.")
+                val displayName = it.user?.displayName
+                Timber.i("firebaseAuth.currentUser?.displayName is ${firebaseAuth.currentUser?.displayName} and it.user?.displayName is ${it.user?.displayName}")
+                val uid = it.user?.uid
+                Timber.i("firebaseAuth.uid is ${firebaseAuth.uid} and it.user?.uid is ${it.user?.uid}")
+                Timber.i("displayName is $displayName and uid is $uid")
+                uploadImageToFireStoreStorage()
+                Toast.makeText(
+                    this@RegisterActivity,
+                    "Success. You have signed up.",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+            .addOnFailureListener {
+                Timber.e(it)
+                Toast.makeText(this@RegisterActivity, "You have entered the wrong code. Try again..", Toast.LENGTH_SHORT).show()
+            }
     }
 
     private fun uploadImageToFireStoreStorage(){

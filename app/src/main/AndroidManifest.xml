@@ -1,16 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.example.messenger">
+    package="com.example.messenger" >
 
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+
     <uses-feature
         android:name="android.hardware.microphone"
-        android:required="false"/>
+        android:required="false" />
 
-    <uses-permission android:name="android.permission.INTERNET"/>
-    <uses-permission android:name="android.permission.RECORD_AUDIO"/>
-    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS"/>
-    <uses-permission android:name="android.permission.READ_PHONE_STATE"/>
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
     <application
         android:name=".MainApplication"
@@ -19,8 +20,11 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/AppTheme">
-        <activity android:name=".GroupProfileActivity"></activity>
+        android:theme="@style/AppTheme" >
+        <activity android:name=".PersonalVoiceCallActivity" />
+        <activity android:name=".GroupProfileActivity" />
+        <activity android:name=".PersonalVideoCallActivity" />
+
         <activity
             android:name=".EachGroupChatActivity"
             android:theme="@style/NoActionBar" />
@@ -43,7 +47,7 @@
             android:theme="@style/NoActionBar" />
         <activity
             android:name=".NewUsersActivity"
-            android:parentActivityName=".LatestMessagesActivity">
+            android:parentActivityName=".LatestMessagesActivity" >
             <intent-filter>
                 <action android:name="android.intent.action.SEND" />
 
@@ -53,7 +57,7 @@
                 <data android:mimeType="text/*" />
             </intent-filter>
         </activity>
-        <activity android:name=".ChooseActivity">
+        <activity android:name=".ChooseActivity" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -63,7 +67,7 @@
 
         <service
             android:name=".MyFirebaseMessagingService"
-            android:permission="com.google.android.c2dm.permission.SEND">
+            android:permission="com.google.android.c2dm.permission.SEND" >
             <intent-filter>
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />
                 <action android:name="com.google.android.c2dm.intent.RECEIVE" />

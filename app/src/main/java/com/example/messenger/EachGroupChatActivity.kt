@@ -461,6 +461,7 @@ class EachGroupChatActivity : AppCompatActivity() {
         override fun bind(viewHolder: GroupieViewHolder, position: Int) {
             val layout = viewHolder.itemView
             layout.my_text_chat_text.text = text
+            layout.my_text_chat_time_stamp.text = convertTimeStampToAdapterTime(newGroupMessage.timeStamp)
 
             val myImage = layout.my_text_chat_image
 //            Timber.d("currentUserImageUrl is $currentUserImageUrl")
@@ -479,6 +480,8 @@ class EachGroupChatActivity : AppCompatActivity() {
         override fun bind(viewHolder: GroupieViewHolder, position: Int) {
             val layout = viewHolder.itemView
             val image = layout.my_image_chat_image
+
+            layout.my_image_chat_time_stamp.text = convertTimeStampToAdapterTime(newGroupMessage.timeStamp)
 
             Glide.with(layout.context)
                 .load(myImageUrl)
