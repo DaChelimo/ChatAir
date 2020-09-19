@@ -2,8 +2,6 @@ package com.example.messenger
 
 import android.app.Application
 import androidx.lifecycle.ProcessLifecycleOwner
-import com.sinch.android.rtc.Sinch
-import com.sinch.android.rtc.SinchClient
 import timber.log.Timber
 
 class MainApplication: Application() {

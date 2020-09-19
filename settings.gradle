@@ -1,3 +1,4 @@
+include ':libwebrtc_19324'
 include ':sinch-android-rtc-3.17.4-aar'
 include ':sinch-android-rtc-3.17.4'
 include ':app'

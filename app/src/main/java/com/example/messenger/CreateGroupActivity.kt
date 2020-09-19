@@ -28,8 +28,8 @@ class CreateGroupActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        supportActionBar?.title = "New Group"
-        supportActionBar?.subtitle = "Add participants"
+//        supportActionBar?.title = "New Group"
+//        supportActionBar?.subtitle = "Add participants"
 
         binding = DataBindingUtil.setContentView(this, R.layout.activity_create_group)
         val userListRecyclerView = binding.createGroupRecyclerview

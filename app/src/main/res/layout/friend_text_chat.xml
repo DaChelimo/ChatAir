@@ -59,14 +59,16 @@
             android:id="@+id/friends_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:background="@color/friend_chat_background"
             android:maxWidth="200dp"
             android:padding="5dp"
             android:paddingBottom="1dp"
-            tools:text="My chat is longer than yours. Lol. You don't know what you are saying since you just want to add more chat to this."
+            android:textColor="@color/black_icon_color"
             android:textSize="15sp"
             app:layout_constraintEnd_toStartOf="@+id/friends_time_stamp"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="My chat is longer than yours. Lol. You don't know what you are saying since you just want to add more chat to this." />
 
         <TextView
             android:id="@+id/friends_time_stamp"

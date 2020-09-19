@@ -11,6 +11,7 @@ import androidx.databinding.DataBindingUtil
 import androidx.recyclerview.widget.GridLayoutManager
 import com.bumptech.glide.Glide
 import com.example.messenger.databinding.ActivityCreateGroupDetailsBinding
+import com.example.messenger.each_group_chat.EachGroupChatFragment
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.ValueEventListener
@@ -52,8 +53,8 @@ class CreateGroupDetailsActivity : AppCompatActivity() {
             }
         })
 
-        supportActionBar?.title = "New Group"
-        supportActionBar?.subtitle = "Add subject"
+//        supportActionBar?.title = "New Group"
+//        supportActionBar?.subtitle = "Add subject"
 
         if (intent != null) {
 //            participantsIntentArray = intent.getParcelableArrayListExtra(PARTICIPANTS_DATA)
@@ -168,7 +169,7 @@ class CreateGroupDetailsActivity : AppCompatActivity() {
                 val basicGroupData = snapshot.getValue(BasicGroupData::class.java) ?: return
                 Timber.d("group name is ${basicGroupData.groupName}")
 
-                val intent = Intent(this@CreateGroupDetailsActivity, EachGroupChatActivity::class.java)
+                val intent = Intent(this@CreateGroupDetailsActivity, EachGroupChatFragment::class.java)
                 intent.putExtra(GROUP_KEY, basicGroupData)
                 startActivity(intent)
             }

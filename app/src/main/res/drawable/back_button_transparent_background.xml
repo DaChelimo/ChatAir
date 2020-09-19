@@ -3,6 +3,6 @@
     xmlns:tools="http://schemas.android.com/tools" android:shape="oval">
 
     <size android:width="32dp" android:height="32dp"/>
-    <solid android:color="@android:color/transparent" tools:color="@android:color/white"/>
+    <solid android:color="@android:color/transparent"/>
 
 </shape>

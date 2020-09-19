@@ -34,8 +34,8 @@ const val APPLICATION_KEY = "9a4edf60-85ec-4f50-9b25-d1e2f5ba27f9"
 const val APPLICATION_SECRET = "2CkEH85ZGUioHyQok7Nzpw=="
 
 @Parcelize
-data class User(var userName: String, val uid: String, var profilePictureUrl: String, var aboutDescription: String?, val phoneNumber: String): Parcelable{
-    constructor(): this("",  "", "", null, "")
+data class User(var userName: String, val uid: String, var profilePictureUrl: String?, var aboutDescription: String?, val phoneNumber: String): Parcelable{
+    constructor(): this("",  "", null, null, "")
 }
 
 @Parcelize

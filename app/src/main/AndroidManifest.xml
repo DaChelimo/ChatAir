@@ -1,12 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.example.messenger" >
-
+    xmlns:tools="http://schemas.android.com/tools"
+    package="com.example.messenger">
 
     <uses-feature
         android:name="android.hardware.microphone"
         android:required="false" />
 
+    <uses-sdk tools:overrideLibrary="org.webrtc"/>
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
     <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
@@ -20,44 +21,24 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/AppTheme" >
+        android:theme="@style/AppTheme">
+        <activity
+            android:name=".MainActivity"
+            android:label="@string/title_activity_main"></activity>
         <activity android:name=".PersonalVoiceCallActivity" />
         <activity android:name=".GroupProfileActivity" />
-        <activity android:name=".PersonalVideoCallActivity" />
-
-        <activity
-            android:name=".EachGroupChatActivity"
-            android:theme="@style/NoActionBar" />
         <activity
             android:name=".CreateGroupDetailsActivity"
             android:parentActivityName=".CreateGroupActivity" />
         <activity
             android:name=".CreateGroupActivity"
-            android:parentActivityName=".LatestMessagesActivity" />
-        <activity
-            android:name=".OthersProfileActivity"
-            android:theme="@style/NoActionBar" />
+            android:parentActivityName=".latest_messages.LatestMessagesFragment" />
+        <activity android:name=".OthersProfileActivity" />
         <activity
             android:name=".UserProfileActivity"
-            android:parentActivityName=".LatestMessagesActivity"
-            android:theme="@style/NoActionBar" />
-        <activity
-            android:name=".EachPersonalChatActivity"
-            android:parentActivityName=".LatestMessagesActivity"
-            android:theme="@style/NoActionBar" />
-        <activity
-            android:name=".NewUsersActivity"
-            android:parentActivityName=".LatestMessagesActivity" >
-            <intent-filter>
-                <action android:name="android.intent.action.SEND" />
+            android:parentActivityName=".latest_messages.LatestMessagesFragment" />
 
-                <category android:name="android.intent.category.APP_MESSAGING" />
-                <category android:name="android.intent.category.DEFAULT" />
-
-                <data android:mimeType="text/*" />
-            </intent-filter>
-        </activity>
-        <activity android:name=".ChooseActivity" >
+        <activity android:name=".ChooseActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -67,7 +48,7 @@
 
         <service
             android:name=".MyFirebaseMessagingService"
-            android:permission="com.google.android.c2dm.permission.SEND" >
+            android:permission="com.google.android.c2dm.permission.SEND">
             <intent-filter>
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />
                 <action android:name="com.google.android.c2dm.intent.RECEIVE" />
@@ -80,15 +61,6 @@
                 android:name="firebase_analytics_collection_enabled"
                 android:value="false" />
         </service>
-
-        <activity android:name=".LatestMessagesActivity" />
-        <activity
-            android:name=".LoginActivity"
-            android:parentActivityName=".RegisterActivity"
-            android:windowSoftInputMode="adjustResize" />
-        <activity
-            android:name=".RegisterActivity"
-            android:windowSoftInputMode="adjustResize" />
 
         <meta-data
             android:name="preloaded_fonts"

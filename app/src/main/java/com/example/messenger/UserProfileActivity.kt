@@ -15,6 +15,9 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
 import com.bumptech.glide.Glide
 import com.example.messenger.databinding.ActivityUserProfileBinding
+import com.example.messenger.each_personal_chat.EachPersonalChatFragment
+import com.example.messenger.latest_messages.LatestMessagesFragment
+import com.example.messenger.register.RegisterFragment
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.ValueEventListener
@@ -41,12 +44,12 @@ class UserProfileActivity : AppCompatActivity() {
 
         toolbar.setNavigationOnClickListener {
             if (intent?.data != null) {
-                val navIntent = Intent(this, EachPersonalChatActivity::class.java)
+                val navIntent = Intent(this, EachPersonalChatFragment::class.java)
                 startActivity(navIntent)
                 finishAffinity()
             }
             else{
-                val navIntent = Intent(this, LatestMessagesActivity::class.java)
+                val navIntent = Intent(this, LatestMessagesFragment::class.java)
                 startActivity(navIntent)
                 finishAffinity()
             }
@@ -67,7 +70,7 @@ class UserProfileActivity : AppCompatActivity() {
     }
 
     override fun onBackPressed() {
-        val navIntent = Intent(this, LatestMessagesActivity::class.java)
+        val navIntent = Intent(this, LatestMessagesFragment::class.java)
         startActivity(navIntent)
         finishAffinity()
     }
@@ -219,7 +222,7 @@ class UserProfileActivity : AppCompatActivity() {
     private fun signOutUser(){
         changeUserActivityToOffline()
         firebaseAuth.signOut()
-        val intent = Intent(this, RegisterActivity::class.java)
+        val intent = Intent(this, RegisterFragment::class.java)
         intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TASK.or(Intent.FLAG_ACTIVITY_NEW_TASK)
         startActivity(intent)
     }

@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/navigation"
+    app:startDestination="@id/registerFragment">
+    <fragment
+        android:id="@+id/registerFragment"
+        android:name="com.example.messenger.register.RegisterFragment"
+        android:label="RegisterFragment"
+        tools:layout="@layout/fragment_register">
+        <action
+            android:id="@+id/action_registerFragment_to_loginFragment"
+            app:destination="@id/loginFragment" />
+        <action
+            android:id="@+id/action_registerFragment_to_latestMessagesFragment"
+            app:destination="@id/latestMessagesFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/loginFragment"
+        android:name="com.example.messenger.login.LoginFragment"
+        android:label="LoginFragment"
+        tools:layout="@layout/fragment_login" >
+        <action
+            android:id="@+id/action_loginFragment_to_latestMessagesFragment"
+            app:destination="@id/latestMessagesFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/latestMessagesFragment"
+        android:name="com.example.messenger.latest_messages.LatestMessagesFragment"
+        android:label="LatestMessagesFragment"
+        tools:layout="@layout/fragment_latest_messages">
+        <action
+            android:id="@+id/action_latestMessagesFragment_to_eachPersonalChatFragment"
+            app:destination="@id/eachPersonalChatFragment" />
+        <action
+            android:id="@+id/action_latestMessagesFragment_to_eachGroupChatFragment"
+            app:destination="@id/eachGroupChatFragment" />
+        <action
+            android:id="@+id/action_latestMessagesFragment_to_newUsersFragment"
+            app:destination="@id/newUsersFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/eachPersonalChatFragment"
+        android:name="com.example.messenger.each_personal_chat.EachPersonalChatFragment"
+        android:label="EachPersonalChatFragment"
+        tools:layout="@layout/fragment_each_personal_chat" >
+        <argument
+            android:name="user"
+            app:argType="com.example.messenger.User" />
+        <action
+            android:id="@+id/action_eachPersonalChatFragment_to_personalVideoCallFragment"
+            app:destination="@id/personalVideoCallFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/eachGroupChatFragment"
+        android:name="com.example.messenger.each_group_chat.EachGroupChatFragment"
+        android:label="EachGroupChatFragment"
+        tools:layout="@layout/fragment_each_group_chat" >
+        <argument
+            android:name="basicGroupData"
+            app:argType="com.example.messenger.BasicGroupData" />
+    </fragment>
+    <fragment
+        android:id="@+id/newUsersFragment"
+        android:name="com.example.messenger.new_users.NewUsersFragment"
+        android:label="NewUsersFragment"
+        tools:layout="@layout/fragment_new_users" >
+        <action
+            android:id="@+id/action_newUsersFragment_to_eachPersonalChatFragment"
+            app:destination="@id/eachPersonalChatFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/personalVideoCallFragment"
+        android:name="com.example.messenger.PersonalVideoCallFragment"
+        android:label="PersonalVideoCallFragment"
+        tools:layout="@layout/fragment_personal_video_call"/>
+</navigation>
