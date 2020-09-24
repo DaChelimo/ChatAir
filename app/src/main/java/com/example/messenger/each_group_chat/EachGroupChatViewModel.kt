@@ -5,7 +5,6 @@ import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
 import android.view.View
-import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.LiveData
@@ -13,6 +12,11 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.example.messenger.*
 import com.example.messenger.R
+import com.example.messenger.each_personal_chat.EachPersonalChatFragment
+import com.example.messenger.notification_pack.MyResponse
+import com.example.messenger.notification_pack.Notification
+import com.example.messenger.notification_pack.NotificationBody
+import com.example.messenger.notification_pack.RetrofitItem
 import com.google.firebase.database.*
 import com.xwray.groupie.GroupAdapter
 import com.xwray.groupie.GroupieViewHolder
@@ -122,24 +126,20 @@ class EachGroupChatViewModel(private val fragment: Fragment) : ViewModel() {
                     if (it.uid != firebaseAuth.uid) {
                         val topic = "/topics/${it.uid}"
 
-                        val dataMap = DataMap(myAccount?.userName!!, lastMessage.textMessage)
+                        val notificationBody = NotificationBody(myAccount?.userName!!, lastMessage.textMessage)
+                        val notification = Notification(topic, notificationBody)
 
-//                        notificationBody =
-//                            NotificationBody(basicGroupData?.groupName.toString() , "${lastMessage.senderAccount?.userName}: ${lastMessage.textMessage}")
-//                        notificationBody?.let {
-//                            notification = Notification(topic, notificationBody!!)
-//                        }
+//                notificationBody = NotificationBody(myAccount?.userName!!, lastMessage.textMessage)
+//                notificationBody?.let {
+//                    notification = Notification(topic, notificationBody!!)
+//                }
 //
-//                        notification?.let {
-//                            sendActualNotification(notification!!)
-//                        }
+//                notification?.let {
+//                    sendActualNotification(notification!!)
+//                }
 
-
-
-                        val data = FCMData(topic, dataMap)
-                        sendActualNotification(data)
-
-                        Timber.d("basicGroupData?.groupMembers.member is ${it.userName} and notification is $dataMap")
+                        sendActualNotification(notification)
+                        Timber.d("basicGroupData?.groupMembers.member is ${it.userName} and notification is $notification")
                     }
                 }
             }
@@ -175,17 +175,17 @@ class EachGroupChatViewModel(private val fragment: Fragment) : ViewModel() {
         _scrollToPosition.value = adapter.itemCount
     }
 
-    fun sendActualNotification(/*notification: Notification*/ data: FCMData) {
-        Timber.d("sendActualNotification called. notification is $data")
-        RetrofitItem.postData.sendNotificationInApi(data)
-            .enqueue(object : Callback<FCMData> {
-                override fun onFailure(call: Call<FCMData>, t: Throwable) {
+    fun sendActualNotification(notification: Notification) {
+        Timber.d("sendActualNotification called. notification is $notification")
+        RetrofitItem.postData.sendNotificationInApi(notification)
+            .enqueue(object : Callback<MyResponse> {
+                override fun onFailure(call: Call<MyResponse>, t: Throwable) {
                     Timber.e(t)
                 }
 
                 override fun onResponse(
-                    call: Call<FCMData>,
-                    response: Response<FCMData>
+                    call: Call<MyResponse>,
+                    response: Response<MyResponse>
                 ) {
                     Timber.d("response.code is ${response.code()}")
                     if (response.code() == 400) {

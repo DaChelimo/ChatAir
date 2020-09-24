@@ -6,6 +6,7 @@ import android.view.*
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.fragment.findNavController
 import com.example.messenger.*
 import com.example.messenger.databinding.FragmentLatestMessagesBinding
 import com.google.firebase.messaging.FirebaseMessaging
@@ -25,6 +26,10 @@ class LatestMessagesFragment : Fragment() {
         FirebaseMessaging.getInstance().isAutoInitEnabled = true
         changeUserActivityToOnline()
 
+        if (firebaseAuth.currentUser == null) {
+            findNavController().navigate(R.id.action_latestMessagesFragment_to_registerFragment)
+        }
+
         binding = DataBindingUtil.inflate(inflater, R.layout.fragment_latest_messages, container, false)
         viewModel = ViewModelProvider(this, LatestMessagesViewModelFactory(this)).get(LatestMessagesViewModel::class.java)
         val latestMessageRecyclerView = binding.latestRecyclerView
@@ -40,28 +45,28 @@ class LatestMessagesFragment : Fragment() {
                     return@setOnItemClickListener
                 }
 
-//                val intent = Intent(view.context, EachPersonalChatActivity::class.java)
-//                intent.putExtra(
-//                    USER_KEY,
-//                    if (item.chatPersonalMessage.senderAccount?.uid != firebaseAuth.uid) item.chatPersonalMessage.senderAccount else item.chatPersonalMessage.receiverAccount
-//                )
-//                Timber.i("item is ${item.chatPersonalMessage} and user is ${item.chatPersonalMessage}")
-//                startActivity(intent)
+                val account =  if (item.chatPersonalMessage.senderAccount?.uid != firebaseAuth.uid) item.chatPersonalMessage.senderAccount else item.chatPersonalMessage.receiverAccount
+                Timber.d("account is $account")
+                findNavController().navigate(LatestMessagesFragmentDirections.actionLatestMessagesFragmentToEachPersonalChatFragment(account ?: return@setOnItemClickListener))
 
             }
             else{
                 item as GroupMessageItem
 
                 Timber.d("group data is ${item.basicGroupData}")
-//                val intent = Intent(this, EachGroupChatActivity::class.java)
-////                intent.putExtra(GROUP_KEY, item.basicGroupData)
-////                startActivity(intent)
+                findNavController().navigate(LatestMessagesFragmentDirections.actionLatestMessagesFragmentToEachGroupChatFragment(item.basicGroupData))
             }
         }
 
         return binding.root
     }
 
+    override fun onResume() {
+        super.onResume()
+        if (firebaseAuth.currentUser == null) {
+            findNavController().navigate(R.id.action_latestMessagesFragment_to_registerFragment)
+        }
+    }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         inflater.inflate(R.menu.latest_messages_menu, menu)

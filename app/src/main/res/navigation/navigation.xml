@@ -39,6 +39,12 @@
         <action
             android:id="@+id/action_latestMessagesFragment_to_newUsersFragment"
             app:destination="@id/newUsersFragment" />
+        <action
+            android:id="@+id/action_latestMessagesFragment_to_registerFragment"
+            app:destination="@id/registerFragment" />
+        <action
+            android:id="@+id/action_latestMessagesFragment_to_createGroupFragment"
+            app:destination="@id/createGroupFragment" />
     </fragment>
     <fragment
         android:id="@+id/eachPersonalChatFragment"
@@ -75,4 +81,25 @@
         android:name="com.example.messenger.PersonalVideoCallFragment"
         android:label="PersonalVideoCallFragment"
         tools:layout="@layout/fragment_personal_video_call"/>
+    <fragment
+        android:id="@+id/createGroupFragment"
+        android:name="com.example.messenger.create_group.CreateGroupFragment"
+        android:label="CreateGroupFragment"
+        tools:layout="@layout/fragment_create_group">
+        <action
+            android:id="@+id/action_createGroupFragment_to_createGroupDetailsFragment"
+            app:destination="@id/createGroupDetailsFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/createGroupDetailsFragment"
+        android:name="com.example.messenger.create_group_details.CreateGroupDetailsFragment"
+        android:label="CreateGroupDetailsFragment"
+        tools:layout="@layout/fragment_create_group_details">
+        <argument
+            android:name="usersList"
+            app:argType="com.example.messenger.User[]" />
+        <action
+            android:id="@+id/action_createGroupDetailsFragment_to_eachGroupChatFragment"
+            app:destination="@id/eachGroupChatFragment" />
+    </fragment>
 </navigation>

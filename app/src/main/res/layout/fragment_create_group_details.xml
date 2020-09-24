@@ -19,7 +19,7 @@
             android:layout_marginStart="16dp"
             android:layout_marginTop="16dp"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/top_line_view"
             app:srcCompat="@drawable/camera_background" />
 
         <ImageView
@@ -107,12 +107,62 @@
             android:id="@+id/group_image"
             android:layout_width="0dp"
             android:layout_height="0dp"
-            android:src="@drawable/ic_userprofile_person_24"
+            app:srcCompat="@drawable/ic_userprofile_person_24"
             android:visibility="gone"
             app:layout_constraintBottom_toBottomOf="@+id/camera_background_image"
             app:layout_constraintEnd_toEndOf="@+id/camera_background_image"
             app:layout_constraintStart_toStartOf="@+id/camera_background_image"
             app:layout_constraintTop_toTopOf="@+id/camera_background_image"
             tools:visibility="visible" />
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/linearLayout"
+            android:layout_width="0dp"
+            android:layout_height="54dp"
+            android:layout_marginStart="8dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/back_btn"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <TextView
+                android:id="@+id/new_group_plain_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:fontFamily="@font/roboto_bold"
+                android:text="New Group"
+                android:textColor="#000"
+                android:textSize="16sp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <TextView
+                android:id="@+id/new_group_participants_num"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="4dp"
+                android:text="Add subject"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <ImageView
+            android:id="@+id/back_btn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="2dp"
+            android:padding="4dp"
+            app:layout_constraintBottom_toBottomOf="@+id/linearLayout"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/linearLayout"
+            app:srcCompat="@drawable/ic_baseline_arrow_back_24" />
+
+
+        <View
+            android:id="@+id/top_line_view"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@color/defaultGrey"
+            app:layout_constraintTop_toBottomOf="@+id/linearLayout" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

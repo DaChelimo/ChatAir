@@ -202,12 +202,6 @@ class EachPersonalChatFragment : Fragment() {
         return binding.root
     }
 
-//    override fun onBackPressed() {
-//        val intent =  Intent(this, LatestMessagesFragment::class.java)
-//        startActivity(intent)
-//        finishAffinity()
-//    }
-
     private fun setToolbarData() {
         val toolbar = binding.toolbarConstraint
         binding.toolbarName.text = friendUser?.userName

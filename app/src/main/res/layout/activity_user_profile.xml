@@ -10,7 +10,7 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:context=".UserProfileActivity">
+        tools:context=".both_profile.UserProfileFragment">
 
         <de.hdodenhof.circleimageview.CircleImageView
             android:id="@+id/userprofile_profile_picture"
@@ -144,17 +144,15 @@
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
-        <androidx.appcompat.widget.Toolbar
+        <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/user_profile_toolbar"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:background="?attr/colorPrimary"
+            android:background="@android:color/holo_red_light"
             android:minHeight="?attr/actionBarSize"
-            android:theme="?attr/actionBarTheme"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:titleTextColor="#FFFFFF" />
+            app:layout_constraintTop_toTopOf="parent" />
 
         <Button
             android:id="@+id/user_profile_save_btn"

@@ -1,4 +1,4 @@
-package com.example.messenger
+package com.example.messenger.notification_pack
 
 import com.jakewharton.retrofit2.adapter.kotlin.coroutines.CoroutineCallAdapterFactory
 import com.squareup.moshi.Moshi
@@ -9,7 +9,6 @@ import retrofit2.Call
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
 import retrofit2.http.Body
-import retrofit2.http.Header
 import retrofit2.http.Headers
 import retrofit2.http.POST
 
@@ -42,15 +41,15 @@ val retrofit: Retrofit = Retrofit.Builder()
 interface ApiService {
 
     @Headers(
-        "Authorization: key=$AUTHORIZATION_KEY"
+        "Authorization: key=$AUTHORIZATION_KEY",
+        "Content-Type:$CONTENT_TYPE"
       )
 
     // @Header("Content-Type") contentType: String = CONTENT_TYPE
     @POST("fcm/send")
     fun sendNotificationInApi(
-        @Body notification: FCMData,
-        @Header("Content-Type") contentType: String = CONTENT_TYPE
-    ): Call<FCMData>
+        @Body notification: Notification
+    ): Call<MyResponse>
 }
 
 object RetrofitItem {

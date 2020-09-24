@@ -1,4 +1,4 @@
-package com.example.messenger
+package com.example.messenger.both_profile
 
 import android.content.Intent
 import android.os.Bundle
@@ -6,6 +6,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.res.ResourcesCompat
 import androidx.databinding.DataBindingUtil
 import com.bumptech.glide.Glide
+import com.example.messenger.*
 import com.example.messenger.databinding.ActivityOthersProfileBinding
 import com.example.messenger.each_personal_chat.EachPersonalChatFragment
 import com.google.firebase.database.DataSnapshot
@@ -40,7 +41,8 @@ class OthersProfileActivity : AppCompatActivity() {
         binding.otherProfileToolbarTitle.text = friendUser?.userName
 
         binding.otherProfileToolbarBackBtn.setOnClickListener {
-            it.background = ResourcesCompat.getDrawable(resources, R.drawable.other_profile_back_onclick, null)
+            it.background = ResourcesCompat.getDrawable(resources,
+                R.drawable.other_profile_back_onclick, null)
             Timber.d("Above navigation")
             val intent = Intent(this, EachPersonalChatFragment::class.java)
             intent.putExtra(USER_KEY, friendUser)

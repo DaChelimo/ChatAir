@@ -24,30 +24,28 @@
         android:theme="@style/AppTheme">
         <activity
             android:name=".MainActivity"
-            android:label="@string/title_activity_main"></activity>
-        <activity android:name=".PersonalVoiceCallActivity" />
-        <activity android:name=".GroupProfileActivity" />
-        <activity
-            android:name=".CreateGroupDetailsActivity"
-            android:parentActivityName=".CreateGroupActivity" />
-        <activity
-            android:name=".CreateGroupActivity"
-            android:parentActivityName=".latest_messages.LatestMessagesFragment" />
-        <activity android:name=".OthersProfileActivity" />
-        <activity
-            android:name=".UserProfileActivity"
-            android:parentActivityName=".latest_messages.LatestMessagesFragment" />
-
-        <activity android:name=".ChooseActivity">
+            android:label="@string/title_activity_main">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity android:name=".PersonalVoiceCallActivity" />
+        <activity android:name=".GroupProfileActivity" />
+        <activity
+            android:name=".CreateGroupDetailsActivity"
+            android:parentActivityName=".create_group.CreateGroupFragment" />
+        <activity
+            android:name=".create_group.CreateGroupFragment"
+            android:parentActivityName=".latest_messages.LatestMessagesFragment" />
+        <activity android:name=".both_profile.OthersProfileActivity" />
+        <activity
+            android:name=".both_profile.UserProfileFragment"
+            android:parentActivityName=".latest_messages.LatestMessagesFragment" />
 
         <service
-            android:name=".MyFirebaseMessagingService"
+            android:name=".notification_pack.MyFirebaseMessagingService"
             android:permission="com.google.android.c2dm.permission.SEND">
             <intent-filter>
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />

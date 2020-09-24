@@ -3,6 +3,7 @@ package com.example.messenger
 import android.content.Context
 import android.net.ConnectivityManager
 import android.os.Parcelable
+import android.widget.Toast
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.PhoneAuthProvider
 import com.google.firebase.database.*
@@ -41,6 +42,14 @@ data class User(var userName: String, val uid: String, var profilePictureUrl: St
 @Parcelize
 data class UserActivity(val uid: String, var isOnline: Boolean, var lastSeen: Long): Parcelable {
     constructor(): this("", false, -1)
+}
+
+fun Context.showShortToast(text: String) {
+    Toast.makeText(this, text, Toast.LENGTH_SHORT).show()
+}
+
+fun Context.showLongToast(text: String) {
+    Toast.makeText(this.applicationContext, text, Toast.LENGTH_LONG).show()
 }
 
 fun changeUserActivityToOffline(){
@@ -147,10 +156,7 @@ data class BasicGroupData(val groupIcon: String?, val groupName: String, val gro
 
 data class GroupLatestMessage(val basicGroupData: BasicGroupData, val message: EachGroupMessage)
 
-data class NotificationBody(val title: String, val message: String)
-data class Notification(val to: String, val data: NotificationBody)
-
-data class FCMData(val to: String, val actualDataMap: DataMap)
+//data class FCMData(val to: String, val actualDataMap: DataMap)
 
 fun sendUserToToDatabase(token: String){
     Timber.d("Token: $token")
@@ -246,7 +252,7 @@ fun convertTimeStampToAdapterTime(timeInMillis: Long): String {
     return convertedTime
 }
 
-data class DataMap(var sendersName: String, var message: String)
+//data class DataMap(var sendersName: String, var message: String)
 
 @Parcelize
 data class EachPersonalMessage(var id: String, val fromId: String, val toId: String, val imageUrl: String?, var textMessage: String, val timeStamp: Long, val username: String, val profilePictureUrl: String, val receiverAccount: User?, val senderAccount: User?, var wasRead: Boolean): Parcelable{

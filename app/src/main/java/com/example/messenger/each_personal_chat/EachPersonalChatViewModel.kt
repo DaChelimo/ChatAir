@@ -5,13 +5,16 @@ import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
 import android.view.View
-import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.example.messenger.*
+import com.example.messenger.notification_pack.MyResponse
+import com.example.messenger.notification_pack.Notification
+import com.example.messenger.notification_pack.NotificationBody
+import com.example.messenger.notification_pack.RetrofitItem
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseReference
@@ -181,7 +184,8 @@ class EachPersonalChatViewModel (private val fragment: EachPersonalChatFragment)
                 val lastMessage = snapshot.getValue(EachPersonalMessage::class.java) ?: return
 
                 if (EachPersonalChatFragment.myAccount?.userName == null) return
-                val dataMap = DataMap(EachPersonalChatFragment.myAccount?.userName!!, lastMessage.textMessage)
+                val notificationBody = NotificationBody(EachPersonalChatFragment.myAccount?.userName!!, lastMessage.textMessage)
+                val notification = Notification(topic, notificationBody)
 
 //                notificationBody = NotificationBody(myAccount?.userName!!, lastMessage.textMessage)
 //                notificationBody?.let {
@@ -192,23 +196,22 @@ class EachPersonalChatViewModel (private val fragment: EachPersonalChatFragment)
 //                    sendActualNotification(notification!!)
 //                }
 
-                val data = FCMData(topic, dataMap)
-                sendActualNotification(data)
+                sendActualNotification(notification)
             }
         })
     }
 
-    fun sendActualNotification(/*notification: Notification*/ data: FCMData) {
-        Timber.d("sendActualNotification called. notification is $data")
-        RetrofitItem.postData.sendNotificationInApi(data)
-            .enqueue(object : Callback<FCMData> {
-                override fun onFailure(call: Call<FCMData>, t: Throwable) {
+    fun sendActualNotification(notification: Notification) {
+        Timber.d("sendActualNotification called. notification is $notification")
+        RetrofitItem.postData.sendNotificationInApi(notification)
+            .enqueue(object : Callback<MyResponse> {
+                override fun onFailure(call: Call<MyResponse>, t: Throwable) {
                     Timber.e(t)
                 }
 
                 override fun onResponse(
-                    call: Call<FCMData>,
-                    response: Response<FCMData>
+                    call: Call<MyResponse>,
+                    response: Response<MyResponse>
                 ) {
                     Timber.d("response.code is ${response.code()}")
                     if (response.code() == 400) {

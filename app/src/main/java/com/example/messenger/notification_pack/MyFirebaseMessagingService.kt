@@ -1,4 +1,4 @@
-package com.example.messenger
+package com.example.messenger.notification_pack
 
 import android.app.NotificationChannel
 import android.app.NotificationManager
@@ -8,7 +8,10 @@ import android.content.Intent
 import android.media.RingtoneManager
 import android.os.Build
 import androidx.core.app.NotificationCompat
-import com.example.messenger.latest_messages.LatestMessagesFragment
+import com.example.messenger.MainActivity
+import com.example.messenger.R
+import com.example.messenger.firebaseAuth
+import com.example.messenger.sendUserToToDatabase
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 import timber.log.Timber
@@ -25,26 +28,30 @@ class MyFirebaseMessagingService: FirebaseMessagingService() {
     override fun onMessageReceived(remoteMessage: RemoteMessage) {
         super.onMessageReceived(remoteMessage)
         // Not getting messages here? See why this may be: https://goo.gl/39bRNJ
-        Timber.d("From: ${remoteMessage.from}")
-
+        Timber.d("From: ${remoteMessage.from} and to: ${remoteMessage.to}")
         Timber.d("remoteMessage.data is ${remoteMessage.data} and notification is ${remoteMessage.notification}")
         // Check if message contains a data payload.
-        remoteMessage.data.isNotEmpty().let {
-            Timber.d("Message data payload: %s", remoteMessage.data)
-            Timber.d("title is ${remoteMessage.data["sendersName"].toString()} and msg is ${remoteMessage.data["message"].toString()}")
 
-            // Compose and show notification
-            if (!remoteMessage.data.isNullOrEmpty()) {
-                val title : String = remoteMessage.data["sendersName"].toString()
-                val msg: String = remoteMessage.data["message"].toString()
-                sendNotification(title, msg)
-            }
-        }
+        val title = remoteMessage.data["title"]
+        val message = remoteMessage.data["message"]
+        sendNotification(title, message)
 
-        // Check if message contains a notification payload.
-        remoteMessage.notification?.let {
-            sendNotification(null, remoteMessage.notification?.body)
-        }
+//        remoteMessage.data.isNotEmpty().let {
+//            Timber.d("Message data payload: %s", remoteMessage.data)
+//            Timber.d("title is ${remoteMessage.data["sendersName"].toString()} and msg is ${remoteMessage.data["message"].toString()}")
+//
+//            // Compose and show notification
+//            if (!remoteMessage.data.isNullOrEmpty()) {
+//                val title : String = remoteMessage.data["sendersName"].toString()
+//                val msg: String = remoteMessage.data["message"].toString()
+//                sendNotification(title, msg)
+//            }
+//        }
+//
+//        // Check if message contains a notification payload.
+//        remoteMessage.notification?.let {
+//            sendNotification(null, remoteMessage.notification?.body)
+//        }
     }
 
     companion object {
@@ -52,7 +59,7 @@ class MyFirebaseMessagingService: FirebaseMessagingService() {
     }
 
     private fun sendNotification(title: String?, messageBody: String?) {
-        val intent = Intent(this, LatestMessagesFragment::class.java)
+        val intent = Intent(this, MainActivity::class.java)
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
         val pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_ONE_SHOT)
         val defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
