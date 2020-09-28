@@ -2,6 +2,7 @@ package com.example.messenger.each_group_chat
 
 import com.bumptech.glide.Glide
 import com.example.messenger.EachGroupMessage
+import com.example.messenger.Account
 import com.example.messenger.R
 import com.example.messenger.convertTimeStampToAdapterTime
 import com.xwray.groupie.GroupieViewHolder
@@ -22,9 +23,10 @@ class MyTextChatItem(val text: String, var newGroupMessage: EachGroupMessage) : 
 
         val myImage = layout.my_text_chat_image
 //            Timber.d("currentUserImageUrl is $currentUserImageUrl")
-        if (EachGroupChatFragment.myAccount?.profilePictureUrl != null) {
+        val myAccount = Account.getAccount()
+        if (myAccount?.profilePictureUrl != null) {
             Glide.with(viewHolder.itemView.context)
-                .load(EachGroupChatFragment.myAccount?.profilePictureUrl)
+                .load(myAccount?.profilePictureUrl)
                 .into(myImage)
         }
         Timber.d("my position is $position")
@@ -46,9 +48,10 @@ class MyImageChatItem(private val myImageUrl: String, val newGroupMessage: EachG
 
         val myImage = layout.my_image_chat_profile_picture
 //            Timber.d("currentUserImageUrl is $currentUserImageUrl")
-        if (EachGroupChatFragment.myAccount?.profilePictureUrl != null) {
+        val myAccount = Account.getAccount()
+        if (myAccount?.profilePictureUrl != null) {
             Glide.with(viewHolder.itemView.context)
-                .load(EachGroupChatFragment.myAccount?.profilePictureUrl)
+                .load(myAccount.profilePictureUrl)
                 .into(myImage)
         }
         Timber.d("my position is $position")
@@ -78,18 +81,18 @@ class FriendImageChatItem(val newGroupMessage: EachGroupMessage) : Item<GroupieV
 
     override fun bind(viewHolder: GroupieViewHolder, position: Int) {
         val layout = viewHolder.itemView
-        val image = layout.image_friends_image
+        val image = layout.image_friends_image 
 
         Glide.with(layout.context)
             .load(newGroupMessage.imageUrl)
             .into(image)
 
-        val friendImage = layout.image_friends_profile_picture
-        if (newGroupMessage.senderAccount?.profilePictureUrl != null) {
-            Glide.with(viewHolder.itemView.context)
-                .load(EachGroupChatFragment.basicGroupData?.groupIcon)
-                .into(friendImage)
-        }
+//        val friendImage = layout.image_friends_profile_picture
+//        if (newGroupMessage.senderAccount?.profilePictureUrl != null) {
+//            Glide.with(viewHolder.itemView.context)
+//                .load(newGroupMessagebasicGroupData?.groupIcon)
+//                .into(friendImage)
+//        }
         Timber.d("my position is $position")
     }
 }

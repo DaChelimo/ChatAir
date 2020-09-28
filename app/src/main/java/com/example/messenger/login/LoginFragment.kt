@@ -9,6 +9,7 @@ import android.widget.Button
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.fragment.findNavController
 import com.bigbangbutton.editcodeview.EditCodeView
 import com.example.messenger.R
 import com.example.messenger.databinding.FragmentLoginBinding
@@ -38,7 +39,7 @@ class LoginFragment : Fragment() {
             }
 
             viewModel.showShortToast("Processing input...")
-            viewModel.verifyPhoneNumber(phoneNumber.text.toString())
+            viewModel.verifyPhoneNumber(phoneNumber.text.toString().trim())
         }
 
         binding.loginEnterCodeBtn.setOnClickListener {
@@ -51,7 +52,10 @@ class LoginFragment : Fragment() {
         }
 
         viewModel.shouldNavigate.observe(viewLifecycleOwner, {
-            if (it) Timber.d("Navigate to LatestMessages Fragment")//TODO: navigate to Latest
+            Timber.d("shouldNavigate is $it")
+            if (it) {
+                findNavController().navigate(LoginFragmentDirections.actionLoginFragmentToLatestMessagesFragment())
+            }
         })
 
         return binding.root

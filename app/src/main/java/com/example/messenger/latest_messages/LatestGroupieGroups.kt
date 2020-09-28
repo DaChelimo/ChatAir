@@ -83,15 +83,16 @@ class LatestMessageItem(val chatPersonalMessage: EachPersonalMessage): Item<Grou
             .placeholder(R.drawable.ic_baseline_person_24)
             .into(layout.latest_item_image)
 
-        var formatString = if (chatPersonalMessage.textMessage.length > 33) chatPersonalMessage.textMessage.substring(0..32) else chatPersonalMessage.textMessage
-        if(chatPersonalMessage.textMessage.length > 27){
+        var formatString = if (chatPersonalMessage.textMessage.length > 30) chatPersonalMessage.textMessage.substring(0..29) else chatPersonalMessage.textMessage
+        if(chatPersonalMessage.textMessage.length > 24){
             formatString += "..."
+            if (chatPersonalMessage.senderAccount?.uid == firebaseAuth.uid) formatString = "You: $formatString"
         }
 
         if (chatPersonalMessage.imageUrl == null) {
             layout.latest_item_last_message.text = formatString
         }else {
-            layout.latest_item_last_message.text = "Image"
+            layout.latest_item_last_message.text = if (chatPersonalMessage.senderAccount?.uid != firebaseAuth.uid) "Image" else "You: Image"
         }
     }
 }

@@ -58,7 +58,7 @@ class PersonalVideoCallFragment: Fragment() {
 
         //Initialize PeerConnectionFactory globals.
         //Params are context, initAudio,initVideo and videoCodecHwAcceleration
-        PeerConnectionFactory.initializeAndroidGlobals(this, true, true, true)
+        PeerConnectionFactory.initializeAndroidGlobals(this.requireContext(), true, true, true)
 
         //Create a new PeerConnectionFactory instance.
         val options = PeerConnectionFactory.Options()

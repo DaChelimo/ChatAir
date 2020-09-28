@@ -1,6 +1,5 @@
 package com.example.messenger.login
 
-import android.content.Intent
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.LiveData
@@ -48,7 +47,7 @@ class LoginViewModel (private val fragment: Fragment) : ViewModel() {
         firebaseAuth.signInWithCredential(credential)
             .addOnSuccessListener {
                 Timber.i("Success. Login: firebaseAuth.signInWithCredential(credential) and uid is ${it.user?.uid}")
-                _shouldNavigate.value = false
+                _shouldNavigate.value = true
             }
             .addOnFailureListener {
                 Timber.e(it)

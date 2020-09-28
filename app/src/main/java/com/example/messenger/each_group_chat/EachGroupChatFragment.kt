@@ -27,19 +27,6 @@ class EachGroupChatFragment : Fragment() {
     lateinit var binding: FragmentEachGroupChatBinding
     private lateinit var viewModel: EachGroupChatViewModel
 
-    companion object {
-        var myAccount: User? = null
-        var basicGroupData: BasicGroupData? = null
-        const val IMAGE_REQUEST_CODE = 1234
-        var longPressMessage: Item<GroupieViewHolder>? = null
-        var longPressView: View? = null
-        var messagesList: LinkedHashMap<String, Item<GroupieViewHolder>> = LinkedHashMap()
-        var canAllowLongClick = true
-    }
-
-    val adapter = GroupAdapter<GroupieViewHolder>()
-    var chooseImageUrl: String? = null
-
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -48,10 +35,10 @@ class EachGroupChatFragment : Fragment() {
         binding = DataBindingUtil.inflate(inflater, R.layout.fragment_each_group_chat, container, false)
         viewModel = ViewModelProvider(this, EachGroupChatViewModelFactory(this)).get(EachGroupChatViewModel::class.java)
 
-//        basicGroupData = intent.getParcelableExtra(GROUP_KEY)
-        if (basicGroupData != null) {
-//            supportActionBar?.title = basicGroupData!!.groupName
-        }
+//        viewModel.basicGroupData = intent.getParcelableExtra(GROUP_KEY)
+//        if (viewModel.basicGroupData != null) {
+////            supportActionBar?.title = viewModel.basicGroupData!!.groupName
+//        }
 
         setToolbarData()
         viewModel.getProfilePicture()
@@ -66,7 +53,7 @@ class EachGroupChatFragment : Fragment() {
         binding.groupChooseImage.setOnClickListener {
             val intent = Intent(Intent.ACTION_PICK)
             intent.type = "image/*"
-            startActivityForResult(intent, IMAGE_REQUEST_CODE)
+            startActivityForResult(intent, viewModel.IMAGE_REQUEST_CODE)
         }
 
         binding.groupSendChatBtn.setOnClickListener {
@@ -79,13 +66,13 @@ class EachGroupChatFragment : Fragment() {
 
         viewModel.listenForMessages()
 
-        chatRecyclerView.adapter = adapter
+        chatRecyclerView.adapter = viewModel.adapter
 
-        adapter.setOnItemLongClickListener { item, view ->
+        viewModel.adapter.setOnItemLongClickListener { item, view ->
 
-            if (canAllowLongClick) {
-                longPressMessage = item
-                longPressView = view
+            if (viewModel.canAllowLongClick) {
+                viewModel.longPressMessage = item
+                viewModel.longPressView = view
 
                 binding.groupLongPressConstraint.visibility = View.VISIBLE
                 binding.groupToolbarConstraint.visibility = View.GONE
@@ -111,11 +98,11 @@ class EachGroupChatFragment : Fragment() {
                     view.setBackgroundColor(resources.getColor(R.color.highlightColor))
                 }
 
-                canAllowLongClick = false
+                viewModel.canAllowLongClick = false
 
                 true
             } else {
-                Timber.i("canAllowLongClick is $canAllowLongClick")
+                Timber.i("canAllowLongClick is ${viewModel.canAllowLongClick}")
 
                 false
             }
@@ -123,7 +110,7 @@ class EachGroupChatFragment : Fragment() {
 
         viewModel.scrollToPosition.observe(viewLifecycleOwner, {
             val lastItem = it - 1
-            Timber.i("adapter.itemCount - 1 is $lastItem and adapter.itemCount is ${adapter.itemCount}")
+            Timber.i("adapter.itemCount - 1 is $lastItem and viewModel.adapter.itemCount is ${viewModel.adapter.itemCount}")
             binding.groupChatRecyclerview.layoutManager?.scrollToPosition(lastItem)
 
             binding.groupChatEdit.text.clear()
@@ -167,7 +154,7 @@ class EachGroupChatFragment : Fragment() {
     }
 
 //    override fun onBackPressed() {
-//        if (basicGroupData != null){
+//        if (viewModel.basicGroupData != null){
 //            val intent = Intent(this, LatestMessagesFragment::class.java)
 //            startActivity(intent)
 //            finishAffinity()
@@ -179,9 +166,9 @@ class EachGroupChatFragment : Fragment() {
 
     private fun setToolbarData() {
         val toolbar = binding.groupToolbarConstraint
-        binding.groupToolbarName.text = basicGroupData?.groupName
+        binding.groupToolbarName.text = viewModel.basicGroupData?.groupName
         Glide.with(this)
-            .load(basicGroupData?.groupIcon)
+            .load(viewModel.basicGroupData?.groupIcon)
             .into(binding.groupToolbarImage)
 
 //        binding.groupBackButton.setOnClickListener {
@@ -192,8 +179,8 @@ class EachGroupChatFragment : Fragment() {
 
         binding.groupToolbarConstraint.setOnClickListener {
 //            val intent = Intent(this, OthersProfileActivity::class.java)
-//            intent.putExtra(FRIEND_USER_PROFILE, basicGroupData)
-//            Timber.i("friend user is ${basicGroupData}")
+//            intent.putExtra(FRIEND_USER_PROFILE, viewModel.basicGroupData)
+//            Timber.i("friend user is ${viewModel.basicGroupData}")
 //            startActivity(intent)
         }
 //        setSupportActionBar(toolbar)
@@ -201,15 +188,15 @@ class EachGroupChatFragment : Fragment() {
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == IMAGE_REQUEST_CODE && resultCode == Activity.RESULT_OK && data != null) {
+        if (requestCode == viewModel.IMAGE_REQUEST_CODE && resultCode == Activity.RESULT_OK && data != null) {
             if (data.data == null) return
             val uri = data.data
             val ref = firebaseStorage.getReference("/images/chat-images/${UUID.randomUUID()}")
             ref.putFile(uri!!).addOnSuccessListener {
                 ref.downloadUrl.addOnSuccessListener {
                     Timber.d("download url is $it")
-                    chooseImageUrl = it.toString()
-                    binding.groupChatEdit.setText(chooseImageUrl.toString())
+                    viewModel.chooseImageUrl = it.toString()
+                    binding.groupChatEdit.setText(viewModel.chooseImageUrl.toString())
                 }
             }.addOnFailureListener {
                 Timber.e(it)

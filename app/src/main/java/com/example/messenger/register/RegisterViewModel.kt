@@ -1,10 +1,7 @@
 package com.example.messenger.register
 
-import android.content.Intent
 import android.net.Uri
-import android.widget.EditText
 import android.widget.Toast
-import androidx.fragment.app.Fragment
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -16,16 +13,18 @@ import timber.log.Timber
 import java.util.*
 import java.util.concurrent.TimeUnit
 
-class RegisterViewModel (private val fragment: RegisterFragment, private val phoneNumber: String, private val username: String): ViewModel() {
+class RegisterViewModel (private val fragment: RegisterFragment): ViewModel() {
 
     private var _shouldNavigate = MutableLiveData<Boolean>()
     val shouldNavigate: LiveData<Boolean>
         get() = _shouldNavigate
 
-    fun verifyPhoneNumber(phoneNumber: String) {
+    var imageUri: Uri? = null
+
+    fun verifyPhoneNumber(phoneNumber: String, username: String) {
         firebasePhoneAuth.verifyPhoneNumber(phoneNumber, 60, TimeUnit.SECONDS, fragment.requireActivity(), object: PhoneAuthProvider.OnVerificationStateChangedCallbacks() {
             override fun onVerificationCompleted(credential: PhoneAuthCredential) {
-                signInWithCredential(credential)
+                signInWithCredential(credential, username, phoneNumber)
             }
 
             override fun onCodeSent(verificationId: String, token: PhoneAuthProvider.ForceResendingToken) {
@@ -39,7 +38,7 @@ class RegisterViewModel (private val fragment: RegisterFragment, private val pho
         })
     }
 
-    fun signInWithCredential(credential: PhoneAuthCredential, imageUri: Uri? = null) {
+    fun signInWithCredential(credential: PhoneAuthCredential, username: String, phoneNumber: String) {
         firebaseAuth.signInWithCredential(credential)
             .addOnSuccessListener {
                 Timber.d("Success.")
@@ -48,7 +47,7 @@ class RegisterViewModel (private val fragment: RegisterFragment, private val pho
                 val uid = it.user?.uid
                 Timber.i("firebaseAuth.uid is ${firebaseAuth.uid} and it.user?.uid is ${it.user?.uid}")
                 Timber.i("displayName is $displayName and uid is $uid")
-                if (imageUri == null) saveUserToFirebaseDatabase(null) else uploadImageToFireStoreStorage(imageUri)
+                if (imageUri == null) saveUserToFirebaseDatabase(null, username, phoneNumber) else uploadImageToFireStoreStorage(imageUri, username, phoneNumber)
                 showShortToast("Success. You have signed up.")
             }
             .addOnFailureListener {
@@ -61,7 +60,11 @@ class RegisterViewModel (private val fragment: RegisterFragment, private val pho
         Toast.makeText(fragment.requireContext(), text, Toast.LENGTH_SHORT).show()
     }
 
-    private fun uploadImageToFireStoreStorage(imageUri: Uri?){
+    private fun uploadImageToFireStoreStorage(
+        imageUri: Uri?,
+        username: String,
+        phoneNumber: String
+    ) {
         if (imageUri == null)return
 
         val fileName = UUID.randomUUID().toString()
@@ -70,12 +73,16 @@ class RegisterViewModel (private val fragment: RegisterFragment, private val pho
         ref.putFile(imageUri).addOnSuccessListener {
             ref.downloadUrl.addOnSuccessListener {
                 Timber.i("downloadUrl is $it")
-                saveUserToFirebaseDatabase(it.toString())
+                saveUserToFirebaseDatabase(it.toString(), username, phoneNumber)
             }
         }
     }
 
-    private fun saveUserToFirebaseDatabase(onlineImageUrl: String?){
+    private fun saveUserToFirebaseDatabase(
+        onlineImageUrl: String?,
+        username: String,
+        phoneNumber: String
+    ){
         val uid = firebaseAuth.uid
         val ref = firebaseDatabase.getReference("/users/${uid}")
         Timber.i("ref is $ref")

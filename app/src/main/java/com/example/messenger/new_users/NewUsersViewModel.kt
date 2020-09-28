@@ -36,7 +36,7 @@ class NewUsersViewModel: ViewModel() {
                     }
                 }
                 adapter.notifyDataSetChanged()
-                Timber.i("End: Size of adapter is ${adapter.groupCount}")
+                Timber.i("End: Size of adapter is ${adapter.itemCount}")
             }
         })
     }

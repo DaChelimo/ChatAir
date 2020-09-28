@@ -24,7 +24,8 @@
         android:theme="@style/AppTheme">
         <activity
             android:name=".MainActivity"
-            android:label="@string/title_activity_main">
+            android:windowSoftInputMode="adjustResize"
+            android:label="@string/app_name">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -33,16 +34,6 @@
         </activity>
         <activity android:name=".PersonalVoiceCallActivity" />
         <activity android:name=".GroupProfileActivity" />
-        <activity
-            android:name=".CreateGroupDetailsActivity"
-            android:parentActivityName=".create_group.CreateGroupFragment" />
-        <activity
-            android:name=".create_group.CreateGroupFragment"
-            android:parentActivityName=".latest_messages.LatestMessagesFragment" />
-        <activity android:name=".both_profile.OthersProfileActivity" />
-        <activity
-            android:name=".both_profile.UserProfileFragment"
-            android:parentActivityName=".latest_messages.LatestMessagesFragment" />
 
         <service
             android:name=".notification_pack.MyFirebaseMessagingService"

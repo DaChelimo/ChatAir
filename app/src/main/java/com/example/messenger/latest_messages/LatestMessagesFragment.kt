@@ -17,6 +17,14 @@ class LatestMessagesFragment : Fragment() {
     lateinit var binding: FragmentLatestMessagesBinding
     private lateinit var viewModel: LatestMessagesViewModel
 
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        Timber.d("firebaseAuth.currentUser is ${firebaseAuth.currentUser?.uid}")
+        if (firebaseAuth.currentUser?.uid == null) {
+            findNavController().navigate(R.id.action_latestMessagesFragment_to_registerFragment)
+        }
+
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -25,10 +33,6 @@ class LatestMessagesFragment : Fragment() {
     ): View? {
         FirebaseMessaging.getInstance().isAutoInitEnabled = true
         changeUserActivityToOnline()
-
-        if (firebaseAuth.currentUser == null) {
-            findNavController().navigate(R.id.action_latestMessagesFragment_to_registerFragment)
-        }
 
         binding = DataBindingUtil.inflate(inflater, R.layout.fragment_latest_messages, container, false)
         viewModel = ViewModelProvider(this, LatestMessagesViewModelFactory(this)).get(LatestMessagesViewModel::class.java)
@@ -56,6 +60,10 @@ class LatestMessagesFragment : Fragment() {
                 Timber.d("group data is ${item.basicGroupData}")
                 findNavController().navigate(LatestMessagesFragmentDirections.actionLatestMessagesFragmentToEachGroupChatFragment(item.basicGroupData))
             }
+        }
+
+        binding.addNewChatBtn.setOnClickListener {
+            findNavController().navigate(LatestMessagesFragmentDirections.actionLatestMessagesFragmentToNewUsersFragment())
         }
 
         return binding.root

@@ -43,40 +43,24 @@ class EachPersonalChatFragment : Fragment() {
     lateinit var binding: FragmentEachPersonalChatBinding
     private lateinit var viewModel: EachPersonalChatViewModel
 
-    companion object {
-        var friendUser: User? = null
-        var myAccount: User? = null
-        const val IMAGE_REQUEST_CODE = 1234
-        var longPressMessage: Item<GroupieViewHolder>? = null
-        var longPressView: ArrayList<View> = ArrayList()
-        var messagesList: ArrayList<Item<GroupieViewHolder>> = ArrayList()
-        var canAllowLongClick = true
-    }
-
-    var chooseImageUrl: String? = null
-
-
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        canAllowLongClick = true
 
         binding = DataBindingUtil.inflate(inflater, R.layout.fragment_each_personal_chat, container, false)
         viewModel = ViewModelProvider(this, EachPersonalChatViewModelFactory(this)).get(EachPersonalChatViewModel::class.java)
-
-//        friendUser = intent.getParcelableExtra(USER_KEY)
-//        val intentMessage = intent.getStringExtra(INTENT_URI)
+        viewModel.canAllowLongClick = true
+        viewModel.friendUser.value = EachPersonalChatFragmentArgs.fromBundle(requireArguments()).user
 
         setToolbarData()
         viewModel.changeLatestMessageStatusToRead()
-
-        if (friendUser != null) {
-//            supportActionBar?.title = friendUser!!.userName
-        }
-
         viewModel.getProfilePicture()
+
+        viewModel.friendUser.observe(viewLifecycleOwner, {
+            setToolbarData()
+        })
 
         val chatRecyclerView = binding.chatRecyclerview
 //        Timber.d("intentMessage is $intentMessage.")
@@ -87,7 +71,7 @@ class EachPersonalChatFragment : Fragment() {
         binding.chooseImage.setOnClickListener {
             val intent = Intent(Intent.ACTION_PICK)
             intent.type = "image/*"
-            startActivityForResult(intent, IMAGE_REQUEST_CODE)
+            startActivityForResult(intent, viewModel.IMAGE_REQUEST_CODE)
         }
 
         binding.sendChatBtn.setOnClickListener {
@@ -95,7 +79,7 @@ class EachPersonalChatFragment : Fragment() {
                 viewModel.showShortToast("Text cannot be empty")
                 return@setOnClickListener
             }
-            viewModel.sendMessage(chooseImageUrl, binding.chatEdit.text.toString())
+            viewModel.sendMessage(viewModel.chooseImageUrl, binding.chatEdit.text.toString())
         }
 
         viewModel.listenForMessages()
@@ -105,10 +89,10 @@ class EachPersonalChatFragment : Fragment() {
 
         viewModel.adapter.setOnItemLongClickListener { item, view ->
 
-            if(canAllowLongClick) {
-                longPressMessage = item
-                longPressView.add(view)
-                Timber.d("longPressView size is ${longPressView.size}")
+            if(viewModel.canAllowLongClick) {
+                viewModel.longPressMessage = item
+                viewModel.longPressView.add(view)
+                Timber.d("longPressView size is ${viewModel.longPressView.size}")
 
                 binding.longPressToolbar.visibility = View.VISIBLE
                 binding.toolbarConstraint.visibility = View.GONE
@@ -134,12 +118,12 @@ class EachPersonalChatFragment : Fragment() {
                     view.setBackgroundColor(resources.getColor(R.color.highlightColor))
                 }
 
-                canAllowLongClick = false
+                viewModel.canAllowLongClick = false
 
                 true
             }
             else{
-                Timber.i("canAllowLongClick is $canAllowLongClick")
+                Timber.i("viewModel.canAllowLongClick is $viewModel.canAllowLongClick")
 
                 false
             }
@@ -150,7 +134,6 @@ class EachPersonalChatFragment : Fragment() {
             Timber.i("adapter.itemCount - 1 is $lastItem and adapter.itemCount is $it")
             binding.chatRecyclerview.layoutManager?.scrollToPosition(lastItem)
 
-//            val imm = getSystemService(this.requireContext(), Context.INPUT_METHOD_SERVICE) as InputMethodManager
             val imm  = this.requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
             imm.hideSoftInputFromWindow(binding.sendChatBtn.windowToken, 0)
         })
@@ -188,13 +171,14 @@ class EachPersonalChatFragment : Fragment() {
 
         binding.personalVoiceCallBtn.setOnClickListener {
 //            val intent = Intent(this, PersonalVoiceCallActivity::class.java)
-//            intent.putExtra(VOICE_CALL_USER, friendUser)
+//            intent.putExtra(VOICE_CALL_USER, viewModel.friendUser.value)
 //            startActivity(intent)
+            findNavController().navigate(EachPersonalChatFragmentDirections.actionEachPersonalChatFragmentToPersonalVideoCallFragment())
         }
 
         binding.personalVideoCallBtn.setOnClickListener {
 //            val intent = Intent(this, PersonalVideoCallActivity::class.java)
-////            intent.putExtra(VOICE_CALL_USER, friendUser)
+////            intent.putExtra(VOICE_CALL_USER, viewModel.friendUser.value)
 //            startActivity(intent)
             findNavController().navigate(EachPersonalChatFragmentDirections.actionEachPersonalChatFragmentToPersonalVideoCallFragment())
         }
@@ -203,20 +187,18 @@ class EachPersonalChatFragment : Fragment() {
     }
 
     private fun setToolbarData() {
-        val toolbar = binding.toolbarConstraint
-        binding.toolbarName.text = friendUser?.userName
+//        val toolbar = binding.toolbarConstraint
+        binding.toolbarName.text = viewModel.friendUser.value?.userName
         Glide.with(this)
-            .load(friendUser?.profilePictureUrl)
+            .load(viewModel.friendUser.value?.profilePictureUrl)
             .into(binding.toolbarImage)
 
         binding.personalBackButtonBtn.setOnClickListener {
-//            val intent =  Intent(this, LatestMessagesFragment::class.java)
-//            startActivity(intent)
-//            finishAffinity()
+            findNavController().popBackStack(R.id.latestMessagesFragment, false)
         }
 
         binding.toolbarLastSeen.text = "Offline"
-        val lastSeenRef = firebaseDatabase.getReference("/users-activity/${friendUser?.uid}")
+        val lastSeenRef = firebaseDatabase.getReference("/users-activity/${viewModel.friendUser.value?.uid}")
 
         lastSeenRef.addValueEventListener(object : ValueEventListener {
             override fun onCancelled(error: DatabaseError) {
@@ -236,8 +218,8 @@ class EachPersonalChatFragment : Fragment() {
 
         binding.toolbarConstraint.setOnClickListener {
 //            val intent = Intent(this, OthersProfileActivity::class.java)
-//            intent.putExtra(FRIEND_USER_PROFILE, friendUser)
-//            Timber.i("friend user is $friendUser")
+//            intent.putExtra(FRIEND_USER_PROFILE, viewModel.friendUser.value)
+//            Timber.i("friend user is $viewModel.friendUser.value")
 //            startActivity(intent)
         }
 //        setSupportActionBar(toolbar)
@@ -245,19 +227,10 @@ class EachPersonalChatFragment : Fragment() {
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == IMAGE_REQUEST_CODE && resultCode == Activity.RESULT_OK && data != null) {
+        if (requestCode == viewModel.IMAGE_REQUEST_CODE && resultCode == Activity.RESULT_OK && data != null) {
             if (data.data == null) return
             val uri = data.data
-            val ref = firebaseStorage.getReference("/images/chat-images/${UUID.randomUUID()}")
-            ref.putFile(uri!!).addOnSuccessListener {
-                ref.downloadUrl.addOnSuccessListener {
-                    Timber.d("download url is $it")
-                    chooseImageUrl = it.toString()
-                    binding.chatEdit.setText(chooseImageUrl.toString())
-                }
-            }.addOnFailureListener {
-                Timber.e(it)
-            }
+            EachPersonalChatFragmentDirections.actionEachPersonalChatFragmentToPreviewImageFragment(viewModel.friendUser.value ?: return, uri.toString(), true)
         }
     }
 

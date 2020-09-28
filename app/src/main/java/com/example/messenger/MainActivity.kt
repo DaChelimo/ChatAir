@@ -27,7 +27,7 @@ class MainActivity : AppCompatActivity() {
                 findNavController(R.id.fragment).currentDestination == NavDestination("com.example.messenger.register.RegisterFragment")
             }"
         )
-        Timber.d("firebaseAuth.currentUser is ${firebaseAuth.currentUser}")
+        Timber.d("firebaseAuth.currentUser is ${firebaseAuth.currentUser?.uid}")
 
         if (findNavController(R.id.fragment).currentDestination == NavDestination("com.example.messenger.register.RegisterFragment")
             && firebaseAuth.currentUser == null) {

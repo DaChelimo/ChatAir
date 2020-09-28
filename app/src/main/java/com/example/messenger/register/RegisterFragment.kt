@@ -33,7 +33,6 @@ class RegisterFragment : Fragment() {
     lateinit var registerBtn: Button
 
 //    var imageUrl: String = "https://thumbs.dreamstime.com/b/default-avatar-profile-vector-user-profile-default-avatar-profile-vector-user-profile-profile-179376714.jpg"
-    var imageUri: Uri? = null
     var user: User? = null
 
     override fun onCreateView(
@@ -48,7 +47,7 @@ class RegisterFragment : Fragment() {
         binding.selectPhotoBtn.alpha = 0F
         binding.selectPhotoText.visibility = View.GONE
 
-        viewModel = ViewModelProvider(this, RegisterViewModelFactory(this, phoneNumber.text.toString(), userName.text.toString())).get(RegisterViewModel::class.java)
+        viewModel = ViewModelProvider(this, RegisterViewModelFactory(this)).get(RegisterViewModel::class.java)
 
         Glide.with(this)
             .load("https://thumbs.dreamstime.com/b/default-avatar-profile-vector-user-profile-default-avatar-profile-vector-user-profile-profile-179376714.jpg")
@@ -70,7 +69,10 @@ class RegisterFragment : Fragment() {
         }
 
         viewModel.shouldNavigate.observe(viewLifecycleOwner, {
-            if (it) Timber.d("Navigate to LatestMessages Fragment")//TODO: navigate to Latest
+            Timber.d("shouldNavigate is $it")
+            if (it) {
+                findNavController().navigate(RegisterFragmentDirections.actionRegisterFragmentToLatestMessagesFragment())
+            }
         })
 
         binding.enterCodeBtn.setOnClickListener {
@@ -104,7 +106,7 @@ class RegisterFragment : Fragment() {
                     showShortToast("Code is being processed.")
                     val credential =
                         PhoneAuthProvider.getCredential(storedVerificationId!!, inputCode.code)
-                    viewModel.signInWithCredential(credential)
+                    viewModel.signInWithCredential(credential, userName.text.toString(), phoneNumber.text.toString().trim())
                     customAlert.dismiss()
                 }
             }
@@ -125,10 +127,10 @@ class RegisterFragment : Fragment() {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == 0 && resultCode == Activity.RESULT_OK && data != null){
             Timber.i("scheme is ${data.data?.scheme}")
-            imageUri = data.data
-            Timber.i("imageUri is $imageUri")
+            viewModel.imageUri = data.data
+            Timber.i("imageUri is ${viewModel.imageUri}")
             Glide.with(this)
-                .load(imageUri)
+                .load(viewModel.imageUri)
                 .into(binding.circleImage)
             binding.selectPhotoBtn.alpha = 0F
             binding.selectPhotoText.visibility = View.GONE
@@ -142,7 +144,7 @@ class RegisterFragment : Fragment() {
         }
 
         showShortToast( "Processing input...")
-        viewModel.verifyPhoneNumber(phoneNumber.text.toString())
+        viewModel.verifyPhoneNumber(phoneNumber.text.toString().trim(), userName.text.toString())
     }
 
 

@@ -33,14 +33,15 @@ class EachPersonalChatViewModel (private val fragment: EachPersonalChatFragment)
     val scrollToPosition: LiveData<Int>
         get() = _scrollToPosition
     
-    var friendUser: User? = null
+    var friendUser = MutableLiveData<User?>()
     var myAccount: User? = null
     val IMAGE_REQUEST_CODE = 1234
     var longPressMessage: Item<GroupieViewHolder>? = null
     var longPressView: ArrayList<View> = ArrayList()
     var messagesList: ArrayList<Item<GroupieViewHolder>> = ArrayList()
     var canAllowLongClick = true
-    
+    var chooseImageUrl: String? = null
+
     val adapter = GroupAdapter<GroupieViewHolder>()
     
     fun showShortToast(text: String) {
@@ -58,7 +59,7 @@ class EachPersonalChatViewModel (private val fragment: EachPersonalChatFragment)
             override fun onDataChange(snapshot: DataSnapshot) {
                 val eachAvailableUser = snapshot.getValue(User::class.java) ?: return
 
-                EachPersonalChatFragment.myAccount = eachAvailableUser
+                myAccount = eachAvailableUser
             }
         })
     }
@@ -76,7 +77,8 @@ class EachPersonalChatViewModel (private val fragment: EachPersonalChatFragment)
             adapter.add(
                 MyImageChatItem(
                     eachPersonalMessage.imageUrl,
-                    eachPersonalMessage
+                    eachPersonalMessage,
+                    fragment
                 )
             )
         }
@@ -87,7 +89,7 @@ class EachPersonalChatViewModel (private val fragment: EachPersonalChatFragment)
 
     fun listenForMessages() {
         val fromId = firebaseAuth.uid
-        val toId = EachPersonalChatFragment.friendUser?.uid
+        val toId = friendUser.value?.uid
         val ref = firebaseDatabase.getReference("/user-messages/$fromId/$toId")
         adapter.clear()
         ref.addListenerForSingleValueEvent(object : ValueEventListener {
@@ -100,6 +102,7 @@ class EachPersonalChatViewModel (private val fragment: EachPersonalChatFragment)
                     addMessageToAdapter(newMessage)
                     changeEachPersonalMessageToRead(newMessage)
                 }
+                _scrollToPosition.value = adapter.itemCount
             }
         })
 
@@ -112,13 +115,13 @@ class EachPersonalChatViewModel (private val fragment: EachPersonalChatFragment)
                     val adapterItem =
                         MyTextChatItem(newMessage.textMessage, newMessage)
                     adapter.add(adapterItem)
-                    EachPersonalChatFragment.messagesList.add(adapterItem)
+                    messagesList.add(adapterItem)
 
                 } else {
                     val adapterItem =
-                        MyImageChatItem(newMessage.imageUrl, newMessage)
+                        MyImageChatItem(newMessage.imageUrl, newMessage, fragment)
                     adapter.add(adapterItem)
-                    EachPersonalChatFragment.messagesList.add(adapterItem)
+                    messagesList.add(adapterItem)
                 }
             } else {
                 if (newMessage.imageUrl == null) {
@@ -126,31 +129,22 @@ class EachPersonalChatViewModel (private val fragment: EachPersonalChatFragment)
                         newMessage.textMessage,
                         newMessage
                     )
-                    adapter.add(
-                        FriendTextChatItem(
-                            newMessage.textMessage,
-                            newMessage
-                        )
-                    )
-                    EachPersonalChatFragment.messagesList.add(adapterItem)
+                    adapter.add(adapterItem)
+                    messagesList.add(adapterItem)
                 } else {
                     val adapterItem = FriendImageChatItem(
                         newMessage.imageUrl,
-                        newMessage
+                        newMessage,
+                        fragment
                     )
-                    adapter.add(
-                        FriendImageChatItem(
-                            newMessage.imageUrl,
-                            newMessage
-                        )
-                    )
-                    EachPersonalChatFragment.messagesList.add(adapterItem)
+                    adapter.add(adapterItem)
+                    messagesList.add(adapterItem)
                 }
             }
         }
         
         val fromId = firebaseAuth.uid
-        val toId = EachPersonalChatFragment.friendUser?.uid
+        val toId = friendUser.value?.uid
         val ref = firebaseDatabase.getReference("/user-messages/$fromId/$toId/${newMessage?.id}/wasRead")
 
         ref.setValue(true)
@@ -167,13 +161,13 @@ class EachPersonalChatViewModel (private val fragment: EachPersonalChatFragment)
 
      fun composeNotification() {
         Timber.d("composeNotification called")
-        val topic = "/topics/${EachPersonalChatFragment.friendUser?.uid}"
+        val topic = "/topics/${friendUser.value?.uid}"
 
 //        var notification: Notification? = null
 //        var notificationBody: NotificationBody?
 
         val ref =
-            firebaseDatabase.getReference("/latest-messages/${firebaseAuth.uid}/${EachPersonalChatFragment.friendUser?.uid}")
+            firebaseDatabase.getReference("/latest-messages/${firebaseAuth.uid}/${friendUser.value?.uid}")
 
         ref.addValueEventListener(object : ValueEventListener {
             override fun onCancelled(error: DatabaseError) {
@@ -183,8 +177,8 @@ class EachPersonalChatViewModel (private val fragment: EachPersonalChatFragment)
             override fun onDataChange(snapshot: DataSnapshot) {
                 val lastMessage = snapshot.getValue(EachPersonalMessage::class.java) ?: return
 
-                if (EachPersonalChatFragment.myAccount?.userName == null) return
-                val notificationBody = NotificationBody(EachPersonalChatFragment.myAccount?.userName!!, lastMessage.textMessage)
+                if (myAccount?.userName == null) return
+                val notificationBody = NotificationBody(myAccount?.userName!!, lastMessage.textMessage)
                 val notification = Notification(topic, notificationBody)
 
 //                notificationBody = NotificationBody(myAccount?.userName!!, lastMessage.textMessage)
@@ -225,36 +219,36 @@ class EachPersonalChatViewModel (private val fragment: EachPersonalChatFragment)
 
     fun sendMessage(chooseImageUrl: String?, textMessage: String) {
         val fromId = firebaseAuth.uid
-        val toId = EachPersonalChatFragment.friendUser?.uid
+        val toId = friendUser.value?.uid
         val ref = firebaseDatabase.getReference("/user-messages/$fromId/$toId").push()
         val toRef = firebaseDatabase.getReference("/user-messages/$toId/$fromId/${ref.key}")
 
-        if (firebaseAuth.uid == null || EachPersonalChatFragment.friendUser?.uid == null) {
+        if (firebaseAuth.uid == null || friendUser.value?.uid == null) {
             Timber.e("Error occurred.")
             return
         }
-        if (EachPersonalChatFragment.myAccount?.userName == null || EachPersonalChatFragment.myAccount?.profilePictureUrl == null || EachPersonalChatFragment.friendUser == null) {
-            Timber.e("friendUser == null is ${EachPersonalChatFragment.friendUser == null} and myAccount?.userName == null is ${EachPersonalChatFragment.myAccount?.userName == null} and myAccount?.profilePictureUrl == null is ${EachPersonalChatFragment.myAccount?.profilePictureUrl == null}")
+        if (myAccount?.userName == null || myAccount?.profilePictureUrl == null || friendUser.value == null) {
+            Timber.e("friendUser.value == null is ${friendUser.value == null} and myAccount?.userName == null is ${myAccount?.userName == null} and myAccount?.profilePictureUrl == null is ${myAccount?.profilePictureUrl == null}")
             return
         }
         val refMessage = EachPersonalMessage(
             id = ref.key.toString(),
             fromId = firebaseAuth.uid!!,
-            toId = EachPersonalChatFragment.friendUser?.uid!!,
+            toId = friendUser.value?.uid!!,
             imageUrl = chooseImageUrl,
             textMessage = textMessage,
             timeStamp = System.currentTimeMillis(),
-            username = EachPersonalChatFragment.myAccount?.userName!!,
-            profilePictureUrl = EachPersonalChatFragment.myAccount?.profilePictureUrl!!,
-            receiverAccount = EachPersonalChatFragment.friendUser,
-            senderAccount = EachPersonalChatFragment.myAccount,
+            username = myAccount?.userName!!,
+            profilePictureUrl = myAccount?.profilePictureUrl!!,
+            receiverAccount = friendUser.value,
+            senderAccount = myAccount,
             wasRead = false
         )
 
         setFirebaseValues(ref, toRef, refMessage)
     }
 
-     fun setFirebaseValues(
+     private fun setFirebaseValues(
         ref: DatabaseReference,
         toRef: DatabaseReference,
         refPersonalMessage: EachPersonalMessage
@@ -264,21 +258,22 @@ class EachPersonalChatViewModel (private val fragment: EachPersonalChatFragment)
 //            listenForMessages()
             addNewMessageToAdapter(refPersonalMessage)
             composeNotification()
+//            _closeKeyboard.value = true
+            _scrollToPosition.value = adapter.itemCount
         }
         val fromId = firebaseAuth.uid
-        val toId = EachPersonalChatFragment.friendUser?.uid
+        val toId = friendUser.value?.uid
         val latestMessagesFromRef = firebaseDatabase.getReference("/latest-messages/$fromId/$toId")
         val latestMessagesToRef = firebaseDatabase.getReference("/latest-messages/$toId/$fromId")
 
-        val latestMessage = refPersonalMessage
-        latestMessage.id = latestMessage.receiverAccount?.uid.toString()
-        latestMessagesFromRef.setValue(latestMessage)
-        latestMessagesToRef.setValue(latestMessage)
+         refPersonalMessage.id = refPersonalMessage.receiverAccount?.uid.toString()
+        latestMessagesFromRef.setValue(refPersonalMessage)
+        latestMessagesToRef.setValue(refPersonalMessage)
 //        chooseImageUrl = null
     }
 
      fun shareMessage() {
-        if (EachPersonalChatFragment.longPressMessage == null) {
+        if (longPressMessage == null) {
             Timber.d("longPressShareBtn is null")
             return
         }
@@ -287,11 +282,11 @@ class EachPersonalChatViewModel (private val fragment: EachPersonalChatFragment)
         intent.type = "text/*"
         intent.putExtra(
             Intent.EXTRA_TEXT,
-            if (EachPersonalChatFragment.longPressMessage is MyTextChatItem) {
-                val myTextChatItem = EachPersonalChatFragment.longPressMessage as MyTextChatItem
+            if (longPressMessage is MyTextChatItem) {
+                val myTextChatItem = longPressMessage as MyTextChatItem
                 myTextChatItem.text
             } else {
-                val friendTextChatItem = EachPersonalChatFragment.longPressMessage as FriendTextChatItem
+                val friendTextChatItem = longPressMessage as FriendTextChatItem
                 friendTextChatItem.text
             }
         )
@@ -301,11 +296,11 @@ class EachPersonalChatViewModel (private val fragment: EachPersonalChatFragment)
 
      fun copyToClipboard() {
         val clipboardManager = fragment.requireContext().getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-        val clipboardText = if (EachPersonalChatFragment.longPressMessage is MyTextChatItem) {
-            val myTextChatItem = EachPersonalChatFragment.longPressMessage as MyTextChatItem
+        val clipboardText = if (longPressMessage is MyTextChatItem) {
+            val myTextChatItem = longPressMessage as MyTextChatItem
             myTextChatItem.text
         } else {
-            val friendTextChatItem = EachPersonalChatFragment.longPressMessage as FriendTextChatItem
+            val friendTextChatItem = longPressMessage as FriendTextChatItem
             friendTextChatItem.text
         }
 
@@ -316,38 +311,38 @@ class EachPersonalChatViewModel (private val fragment: EachPersonalChatFragment)
     }
 
      fun returnItemToDefault() {
-        Timber.d("${EachPersonalChatFragment.longPressView}")
-        EachPersonalChatFragment.longPressView.forEach {
-            Timber.d("new view. Size is ${EachPersonalChatFragment.longPressView.size}")
+        Timber.d("${longPressView}")
+        longPressView.forEach {
+            Timber.d("new view. Size is ${longPressView.size}")
             it.setBackgroundColor(fragment.resources.getColor(R.color.defaultBlue))
         }
-        EachPersonalChatFragment.longPressView.clear()
-        EachPersonalChatFragment.canAllowLongClick = true
+        longPressView.clear()
+        canAllowLongClick = true
     }
 
      fun removeTextMessageFromAdapterForEveryone(
         myRef: DatabaseReference,
         latestMessagesFromRef: DatabaseReference
     ) {
-        if (EachPersonalChatFragment.longPressMessage == null) {
+        if (longPressMessage == null) {
             Timber.d("longPressMessage is null")
             return
         }
 
         deleteMyMessageForMe(myRef, latestMessagesFromRef)
 
-        val myTextChatItem = EachPersonalChatFragment.longPressMessage as MyTextChatItem
+        val myTextChatItem = longPressMessage as MyTextChatItem
 
         try {
 
             Timber.d("myTextChatItem.newMessage.textMessage is ${myTextChatItem.newPersonalMessage.textMessage}")
             Timber.d("Everyone position is ${
-                EachPersonalChatFragment.messagesList.indexOf(
-                    EachPersonalChatFragment.longPressMessage!!)}")
-            Timber.d("MessageList size is ${EachPersonalChatFragment.messagesList.size}")
+                messagesList.indexOf(
+                    longPressMessage!!)}")
+            Timber.d("MessageList size is ${messagesList.size}")
             Timber.d("Position of item in adapter is ${adapter.getAdapterPosition(
-                EachPersonalChatFragment.longPressMessage!!)}")
-            Timber.d("longPressMessage is ${(EachPersonalChatFragment.longPressMessage as MyTextChatItem).newPersonalMessage}")
+                longPressMessage!!)}")
+            Timber.d("longPressMessage is ${(longPressMessage as MyTextChatItem).newPersonalMessage}")
 
             if (myTextChatItem.newPersonalMessage.textMessage != "This message was deleted") {
                 myTextChatItem.newPersonalMessage.textMessage = "This message was deleted"
@@ -360,13 +355,13 @@ class EachPersonalChatViewModel (private val fragment: EachPersonalChatFragment)
 //                Timber.d("Success. messageList[position] with adapter.position is ${messagesList[adapter.getAdapterPosition(longPressMessage!!)]}")
 //
 //                adapter.update(messagesList)
-            EachPersonalChatFragment.longPressMessage = myTextChatItem
-            EachPersonalChatFragment.longPressMessage?.notifyChanged()
-            adapter.notifyItemChanged(adapter.getAdapterPosition(EachPersonalChatFragment.longPressMessage!!))
+            longPressMessage = myTextChatItem
+            longPressMessage?.notifyChanged()
+            adapter.notifyItemChanged(adapter.getAdapterPosition(longPressMessage!!))
 
             Timber.d("updated message is ${(adapter.getItem(adapter.getAdapterPosition(
-                EachPersonalChatFragment.longPressMessage!!)) as MyTextChatItem).newPersonalMessage}")
-            EachPersonalChatFragment.longPressMessage = null
+                longPressMessage!!)) as MyTextChatItem).newPersonalMessage}")
+            longPressMessage = null
         }
         catch(e: ArrayIndexOutOfBoundsException){
             Timber.e(e)
@@ -387,43 +382,43 @@ class EachPersonalChatViewModel (private val fragment: EachPersonalChatFragment)
         myRef: DatabaseReference,
         latestMessagesFromRef: DatabaseReference
     ) {
-        if (EachPersonalChatFragment.longPressMessage == null) {
+        if (longPressMessage == null) {
             Timber.d("longPressMessage is null")
             return
         }
-        val position = EachPersonalChatFragment.messagesList.indexOf(EachPersonalChatFragment.longPressMessage!!)
-        Timber.d("messageList size is ${EachPersonalChatFragment.messagesList.size}")
+        val position = messagesList.indexOf(longPressMessage!!)
+        Timber.d("messageList size is ${messagesList.size}")
 
         try {
-            if (EachPersonalChatFragment.longPressMessage is MyTextChatItem) {
+            if (longPressMessage is MyTextChatItem) {
                 Timber.d("position is $position")
 
                 if (position >= 0) {
                     Timber.d("It worked, no error")
                 }
 
-                val myTextChatItem = EachPersonalChatFragment.longPressMessage as MyTextChatItem
+                val myTextChatItem = longPressMessage as MyTextChatItem
                 Timber.i("myTextChatItem is ${myTextChatItem.newPersonalMessage.textMessage}")
 
                 if (myTextChatItem.newPersonalMessage.textMessage != "This message was deleted") {
                     myTextChatItem.newPersonalMessage.textMessage = "This message was deleted"
 
-                    (EachPersonalChatFragment.messagesList[position] as MyTextChatItem).newPersonalMessage.textMessage =
+                    (messagesList[position] as MyTextChatItem).newPersonalMessage.textMessage =
                         "This message was deleted"
 
-                    adapter.update(EachPersonalChatFragment.messagesList)
+                    adapter.update(messagesList)
                     deleteMyMessageForMe(myRef, latestMessagesFromRef)
-                    EachPersonalChatFragment.longPressMessage = null
+                    longPressMessage = null
 
                 } else {
-                    adapter.remove(EachPersonalChatFragment.longPressMessage!!)
+                    adapter.remove(longPressMessage!!)
 
                     val fromId = myTextChatItem.newPersonalMessage.fromId
                     val toId = myTextChatItem.newPersonalMessage.toId
                     val key = myTextChatItem.newPersonalMessage.id
                     val ref = firebaseDatabase.getReference("/user-messages/$fromId/$toId/$key")
 
-                    EachPersonalChatFragment.longPressMessage = null
+                    longPressMessage = null
 
                     ref.removeValue()
                         .addOnSuccessListener {
@@ -434,11 +429,11 @@ class EachPersonalChatViewModel (private val fragment: EachPersonalChatFragment)
                         }
                 }
             } else {
-                adapter.remove(EachPersonalChatFragment.longPressMessage!!)
+                adapter.remove(longPressMessage!!)
 
-                val friendTextChatItem = EachPersonalChatFragment.longPressMessage as FriendTextChatItem
+                val friendTextChatItem = longPressMessage as FriendTextChatItem
                 Timber.i("myTextChatItem is ${friendTextChatItem.newPersonalMessage.textMessage}")
-                EachPersonalChatFragment.longPressMessage = null
+                longPressMessage = null
 
                 val fromId = friendTextChatItem.newPersonalMessage.fromId
                 val toId = friendTextChatItem.newPersonalMessage.toId
@@ -464,30 +459,30 @@ class EachPersonalChatViewModel (private val fragment: EachPersonalChatFragment)
 
 
      fun deleteMessage() {
-        if (EachPersonalChatFragment.longPressMessage == null) {
+        if (longPressMessage == null) {
             Timber.d("longPressShareBtn is null")
             return
         }
 
-        if (EachPersonalChatFragment.longPressMessage is MyTextChatItem) {
-            val message = EachPersonalChatFragment.longPressMessage as MyTextChatItem
+        if (longPressMessage is MyTextChatItem) {
+            val message = longPressMessage as MyTextChatItem
 
             deleteMyMessage(message)
         } else {
-            val message = EachPersonalChatFragment.longPressMessage as FriendTextChatItem
+            val message = longPressMessage as FriendTextChatItem
 
             deleteFriendMessage(message)
         }
     }
 
     fun changeLatestMessageStatusToRead(){
-        val latestWasReadRef = firebaseDatabase.getReference("/latest-messages/${firebaseAuth.uid}/${EachPersonalChatFragment.friendUser?.uid}/wasRead")
+        val latestWasReadRef = firebaseDatabase.getReference("/latest-messages/${firebaseAuth.uid}/${friendUser.value?.uid}/wasRead")
         latestWasReadRef.setValue(true)
     }
 
     fun changeEachPersonalMessageToRead(eachPersonalMessage: EachPersonalMessage){
         val fromId = firebaseAuth.uid
-        val toId = EachPersonalChatFragment.friendUser?.uid
+        val toId = friendUser.value?.uid
         val eachMessageWasReadRef = firebaseDatabase.getReference("/user-messages/$fromId/$toId/${eachPersonalMessage.id}/wasRead")
 
         eachMessageWasReadRef.setValue(true)
@@ -505,7 +500,7 @@ class EachPersonalChatViewModel (private val fragment: EachPersonalChatFragment)
 
     private fun deleteFriendMessage(message: FriendTextChatItem) {
         val fromId = firebaseAuth.uid
-        val toId = EachPersonalChatFragment.friendUser?.uid
+        val toId = friendUser.value?.uid
         val myRef =
             firebaseDatabase.getReference("/user-messages/$fromId/$toId/${message.newPersonalMessage.id}")
         firebaseDatabase.getReference("/user-messages/$toId/$fromId/${message.newPersonalMessage.id}")
@@ -515,7 +510,7 @@ class EachPersonalChatViewModel (private val fragment: EachPersonalChatFragment)
 
         val alertDialog = AlertDialog.Builder(fragment.requireContext())
             .setTitle("Delete message")
-            .setMessage("Are you sure you want to delete message from ${EachPersonalChatFragment.friendUser?.userName}")
+            .setMessage("Are you sure you want to delete message from ${friendUser.value?.userName}")
             .setPositiveButton("DELETE FOR ME") { _, _ ->
                 removeTextMessageFromAdapterForMe(myRef, latestMessagesFromRef)
                 returnItemToDefault()
@@ -557,7 +552,7 @@ class EachPersonalChatViewModel (private val fragment: EachPersonalChatFragment)
 
     private fun deleteMyMessage(message: MyTextChatItem) {
         val fromId = firebaseAuth.uid
-        val toId = EachPersonalChatFragment.friendUser?.uid
+        val toId = friendUser.value?.uid
         val myRef =
             firebaseDatabase.getReference("/user-messages/$fromId/$toId/${message.newPersonalMessage.id}")
         val toRef =

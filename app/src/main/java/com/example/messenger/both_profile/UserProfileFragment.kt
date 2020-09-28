@@ -9,6 +9,7 @@ import androidx.core.app.ActivityCompat.startActivityForResult
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.fragment.findNavController
 import com.bumptech.glide.Glide
 import com.example.messenger.*
 import com.example.messenger.databinding.ActivityUserProfileBinding
@@ -20,9 +21,9 @@ class UserProfileFragment : Fragment() {
     var myAccount: User? = null
     private var imageUrl: String? = null
 
-    val viewModel = lazy {
+    private val viewModel = lazy {
         ViewModelProvider(viewModelStore, UserProfileViewModelFactory(this)).get(UserProfileViewModel::class.java)
-    }.value
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -31,32 +32,16 @@ class UserProfileFragment : Fragment() {
     ): View? {
         binding = DataBindingUtil.inflate(inflater, R.layout.activity_user_profile, container, false)
 
-        val toolbar = binding.userProfileToolbar
-
-        toolbar.title = "Profile"
-        toolbar.setNavigationIcon(R.drawable.ic_baseline_arrow_back_24)
-
-        toolbar.setNavigationOnClickListener {
-//            if (intent?.data != null) {
-//                val navIntent = Intent(this, EachPersonalChatFragment::class.java)
-//                startActivity(navIntent)
-//                finishAffinity()
-//            }
-//            else{
-//                val navIntent = Intent(this, LatestMessagesFragment::class.java)
-//                startActivity(navIntent)
-//                finishAffinity()
-//            }
+        binding.backBtn.setOnClickListener {
+            findNavController().popBackStack()
         }
 
-//        setSupportActionBar(toolbar)
-
-        viewModel.currentAccount.observe(viewLifecycleOwner, {
+        viewModel.value.currentAccount.observe(viewLifecycleOwner, {
             loadData()
         })
 
         binding.userProfileSaveBtn.setOnClickListener {
-            viewModel.updateUserInFirebaseDatabase()
+            viewModel.value.updateUserInFirebaseDatabase()
         }
 
         binding.userProfileDiscardChangesBtn.setOnClickListener {
@@ -66,9 +51,9 @@ class UserProfileFragment : Fragment() {
         }
 
 
-        viewModel.modifiedAccount.observe(viewLifecycleOwner, {
-            Timber.d("it == viewModel.currentAccount.value is ${it == viewModel.currentAccount.value}")
-            if (it != viewModel.currentAccount.value) {
+        viewModel.value.modifiedAccount.observe(viewLifecycleOwner, {
+            Timber.d("it == viewModel.value.currentAccount.value is ${it == viewModel.value.currentAccount.value}")
+            if (it != viewModel.value.currentAccount.value) {
                 binding.userProfileDiscardChangesBtn.visibility = View.VISIBLE
                 binding.userProfileSaveBtn.visibility = View.VISIBLE
             }
@@ -85,14 +70,14 @@ class UserProfileFragment : Fragment() {
     private fun loadData() {
         resetData()
 
-        binding.userprofileDisplayNameText.addTextChangedListener(viewModel.userNameTextWatcher)
-        binding.userprofileDisplayAboutText.addTextChangedListener(viewModel.aboutTextWatcher)
+        binding.userprofileDisplayNameText.addTextChangedListener(viewModel.value.userNameTextWatcher)
+        binding.userprofileDisplayAboutText.addTextChangedListener(viewModel.value.aboutTextWatcher)
 
         profilePictureClickListener()
     }
 
     private fun resetData() {
-        val user = viewModel.currentAccount.value ?: return
+        val user = viewModel.value.currentAccount.value ?: return
         Glide.with(this)
             .load(user.profilePictureUrl)
             .placeholder(R.drawable.ic_baseline_person_24)
@@ -123,7 +108,7 @@ class UserProfileFragment : Fragment() {
                 .load(imageUri)
                 .into(binding.userprofileProfilePicture)
 
-            viewModel.uploadImageToFireStoreStorage(imageUri)
+            viewModel.value.uploadImageToFireStoreStorage(imageUri)
 
         }
     }

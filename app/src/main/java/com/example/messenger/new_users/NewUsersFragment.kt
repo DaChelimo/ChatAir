@@ -9,6 +9,7 @@ import android.view.ViewGroup
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.fragment.findNavController
 import com.bumptech.glide.Glide
 import com.example.messenger.*
 import com.example.messenger.databinding.FragmentNewUsersBinding
@@ -52,15 +53,10 @@ class NewUsersFragment : Fragment() {
         Timber.i("Init: Size of adapter is ${viewModel.adapter.groupCount}")
 
         viewModel.fetchUsers()
+
         viewModel.adapter.setOnItemClickListener { item, _ ->
-
             val user = item as NewUsersViewModel.UserItem
-
-//            val intent = Intent(view.context, EachPersonalChatFragment::class.java)
-//            intent.putExtra(USER_KEY, user.user)
-//            intent.putExtra(INTENT_URI, intentUri)
-//            Timber.i("item is $item.")
-//            startActivity(intent)
+            findNavController().navigate(NewUsersFragmentDirections.actionNewUsersFragmentToEachPersonalChatFragment(user.user))
         }
 
         return binding.root
