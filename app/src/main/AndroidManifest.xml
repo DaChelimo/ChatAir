@@ -1,6 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     package="com.example.messenger">
+
+    <uses-feature
+        android:name="android.hardware.microphone"
+        android:required="false" />
+
+    <uses-sdk tools:overrideLibrary="org.webrtc"/>
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
     <application
         android:name=".MainApplication"
@@ -10,29 +22,22 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".EachChatActivity"
-            android:parentActivityName=".LatestMessagesActivity"/>
         <activity
-            android:name=".NewUsersActivity"
-            android:parentActivityName=".LatestMessagesActivity">
-            <intent-filter>
-                <action android:name="android.intent.action.SEND"/>
-                <category android:name="android.intent.category.APP_MESSAGING"/>
-                <category android:name="android.intent.category.DEFAULT"/>
-                <data android:mimeType="text/*"/>
-            </intent-filter>
-        </activity>
-        <activity android:name=".ChooseActivity">
+            android:name=".MainActivity"
+            android:windowSoftInputMode="adjustResize"
+            android:label="@string/app_name">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <service
-            android:name=".MyFirebaseMessagingService"
-            android:permission="com.google.android.c2dm.permission.SEND">
+        <activity android:name=".PersonalVoiceCallActivity" />
+        <activity android:name=".GroupProfileActivity" />
 
+        <service
+            android:name=".notification_pack.MyFirebaseMessagingService"
+            android:permission="com.google.android.c2dm.permission.SEND">
             <intent-filter>
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />
                 <action android:name="com.google.android.c2dm.intent.RECEIVE" />
@@ -45,16 +50,10 @@
                 android:name="firebase_analytics_collection_enabled"
                 android:value="false" />
         </service>
-<!--        <service android:name=".MyFirebaseInstanceIDService">-->
-<!--            <intent-filter>-->
-<!--                <action android:name="com.google.firebase.INSTANCE_ID_EVENT"/>-->
-<!--            </intent-filter>-->
-<!--        </service>-->
-        <activity android:name=".LatestMessagesActivity" />
-        <activity
-            android:name=".LoginActivity"
-            android:parentActivityName=".RegisterActivity"/>
-        <activity android:name=".RegisterActivity" />
+
+        <meta-data
+            android:name="preloaded_fonts"
+            android:resource="@array/preloaded_fonts" />
     </application>
 
 </manifest>

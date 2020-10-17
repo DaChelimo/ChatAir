@@ -1,0 +1,183 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:context=".both_profile.UserProfileFragment">
+
+        <de.hdodenhof.circleimageview.CircleImageView
+            android:id="@+id/others_profile_profile_picture"
+            android:layout_width="140dp"
+            android:layout_height="140dp"
+            android:layout_marginTop="40dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/constraintLayout"
+            app:srcCompat="@drawable/ic_baseline_person_24" />
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/phone_constraint"
+            android:layout_width="match_parent"
+            android:layout_height="80dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/about_constraint">
+
+            <ImageView
+                android:id="@+id/others_profile_phone_icon"
+                style="@style/userprofile_mini_image"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:srcCompat="@drawable/ic_userprofile_phone_24" />
+
+            <TextView
+                android:id="@+id/others_profile_plain_phone_text"
+                style="@style/userprofile_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:text="Phone"
+                app:layout_constraintStart_toEndOf="@+id/others_profile_phone_icon"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <TextView
+                android:id="@+id/others_profile_display_phone_text"
+                style="@style/userprofile_content"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:textColor="@android:color/primary_text_light_nodisable"
+                android:textSize="16sp"
+                app:layout_constraintStart_toStartOf="@+id/others_profile_plain_phone_text"
+                app:layout_constraintTop_toBottomOf="@+id/others_profile_plain_phone_text"
+                tools:text="+254 77414 7890" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/name_constraint"
+            android:layout_width="0dp"
+            android:layout_height="90dp"
+            android:layout_marginTop="40dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="1.0"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/others_profile_profile_picture">
+
+            <TextView
+                android:id="@+id/others_profile_display_name_text"
+                style="@style/userprofile_content"
+                android:layout_marginTop="8dp"
+                android:background="@drawable/userprofile_edit"
+                android:inputType="text"
+                android:textColor="@android:color/secondary_text_light"
+                android:textSize="16sp"
+                app:layout_constraintStart_toStartOf="@+id/others_profile_plain_name_text"
+                app:layout_constraintTop_toBottomOf="@+id/others_profile_plain_name_text"
+                tools:text="Andrew Chelix" />
+
+            <TextView
+                android:id="@+id/others_profile_plain_name_text"
+                style="@style/userprofile_title"
+                android:layout_marginTop="16dp"
+                android:text="Name"
+                app:layout_constraintStart_toEndOf="@+id/others_profile_account_image"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <ImageView
+                android:id="@+id/others_profile_account_image"
+                style="@style/userprofile_mini_image"
+                app:layout_constraintBottom_toBottomOf="@+id/others_profile_display_name_text"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="@+id/others_profile_plain_name_text"
+                app:srcCompat="@drawable/ic_userprofile_person_24" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/about_constraint"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/name_constraint">
+
+            <TextView
+                android:id="@+id/others_profile_plain_about_text"
+                style="@style/userprofile_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:text="About"
+                app:layout_constraintStart_toEndOf="@+id/others_profile_about_icon"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <ImageView
+                android:id="@+id/others_profile_about_icon"
+                style="@style/userprofile_mini_image"
+                android:layout_marginTop="8dp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="@+id/others_profile_plain_about_text"
+                app:srcCompat="@drawable/ic_userprofile_outline_info_24" />
+
+            <TextView
+                android:id="@+id/others_profile_display_about_text"
+                style="@style/userprofile_content"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="5dp"
+                android:layout_marginEnd="16dp"
+                android:layout_marginBottom="10dp"
+                android:background="@drawable/userprofile_edit"
+                android:textSize="16sp"
+                android:textColor="@android:color/secondary_text_light"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="@+id/others_profile_plain_about_text"
+                app:layout_constraintTop_toBottomOf="@+id/others_profile_plain_about_text"
+                tools:text="Welcome to Kotlin Messenger." />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/constraintLayout"
+            android:layout_width="0dp"
+            android:layout_height="56dp"
+            android:background="@color/colorPrimary"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <ImageView
+                android:id="@+id/other_profile_toolbar_back_btn"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:background="@drawable/others_profile_back_transparent_background"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:srcCompat="@drawable/ic_baseline_arrow_back_24" />
+
+            <TextView
+                android:id="@+id/other_profile_toolbar_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:fontFamily="sans-serif-medium"
+                android:textColor="#FFFFFF"
+                android:textSize="16sp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toEndOf="@+id/other_profile_toolbar_back_btn"
+                app:layout_constraintTop_toTopOf="parent"
+                tools:text="Andrew Chelix" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>

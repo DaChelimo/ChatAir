@@ -1,11 +1,17 @@
 <resources>
     <!-- Base application theme. -->
-    <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
+    <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
         <!-- Customize your theme here. -->
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
+<!--        <item name="colorPrimary">@android:color/transparent</item>-->
+<!--        <item name="colorPrimaryDark">@android:color/transparent</item>-->
+<!--        <item name="colorAccent">@android:color/transparent</item>-->
+
+        <item name="textColor">@color/textColor</item>
     </style>
+
 
     <style name="register_default_text">
         <item name="android:layout_width">match_parent</item>
@@ -15,6 +21,27 @@
         <item name="android:layout_marginStart">32dp</item>
         <item name="android:layout_marginEnd">32dp</item>
         <item name="android:paddingStart">16dp</item>
+    </style>
+
+    <style name="userprofile_title">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_marginStart">28dp</item>
+        <item name="android:fontFamily">sans-serif-condensed-light</item>
+        <item name="android:textSize">18sp</item>
+    </style>
+
+    <style name="userprofile_content">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:fontFamily">@font/roboto</item>
+        <item name="android:textSize">18sp</item>
+    </style>
+
+    <style name="userprofile_mini_image">
+        <item name="android:layout_width">30dp</item>
+        <item name="android:layout_height">30dp</item>
+        <item name="android:layout_marginStart">16dp</item>
     </style>
 
 </resources>

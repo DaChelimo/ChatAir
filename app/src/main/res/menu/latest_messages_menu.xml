@@ -8,8 +8,13 @@
         android:title="Add User"
         app:showAsAction="always" />
     <item
-        android:id="@+id/sign_out"
-        android:icon="@drawable/ic_baseline_exit_to_app_24"
-        android:title="Sign Out"
+        android:id="@+id/my_account"
+        android:icon="@drawable/ic_placeholder_person_24"
+        android:title="My Account"
+        app:showAsAction="always" />
+    <item
+        android:id="@+id/create_group"
+        android:icon="@drawable/ic_baseline_group_add_24"
+        android:title="Create Group"
         app:showAsAction="always" />
 </menu>

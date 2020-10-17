@@ -18,18 +18,77 @@
         app:layout_constraintTop_toTopOf="parent"
         app:srcCompat="@drawable/ic_baseline_person_24" />
 
+<!--    <ImageView-->
+<!--        android:id="@+id/my_image_chat_image"-->
+<!--        android:layout_width="wrap_content"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:layout_marginEnd="8dp"-->
+<!--        android:adjustViewBounds="true"-->
+<!--        android:background="@drawable/my_chat_image"-->
+<!--        android:maxWidth="230dp"-->
+<!--        android:maxHeight="230dp"-->
+<!--        android:padding="5dp"-->
+<!--        app:layout_constraintBottom_toBottomOf="parent"-->
+<!--        app:layout_constraintEnd_toStartOf="@+id/my_image_chat_profile_picture"-->
+<!--        app:layout_constraintTop_toTopOf="parent"-->
+<!--        tools:srcCompat="@tools:sample/backgrounds/scenic" />-->
+
+<!--    <TextView-->
+<!--        android:id="@+id/my_image_chat_time_stamp"-->
+<!--        android:layout_width="wrap_content"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:textColor="#FFF"-->
+<!--        android:textSize="10sp"-->
+<!--        app:layout_constraintBottom_toBottomOf="@+id/my_image_chat_image"-->
+<!--        app:layout_constraintEnd_toEndOf="@+id/my_image_chat_image"-->
+<!--        tools:text="15:05" />-->
+
     <ImageView
-        android:id="@+id/my_image_chat_image"
+        android:id="@+id/background_image"
+        android:layout_width="250dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:adjustViewBounds="true"
+        android:maxWidth="230dp"
+        android:padding="4dp"
+        app:layout_constraintEnd_toStartOf="@+id/my_image_chat_profile_picture"
+        app:layout_constraintStart_toEndOf="@+id/image_friends_profile_picture"
+        app:layout_constraintTop_toTopOf="@+id/image_friends_profile_picture"
+        app:srcCompat="@drawable/friend_chat_image"
+        tools:src="@tools:sample/backgrounds/scenic" />
+
+    <TextView
+        android:id="@+id/my_image_chat_time_stamp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="8dp"
-        android:adjustViewBounds="true"
-        android:background="@drawable/my_chat_image"
-        android:maxWidth="230dp"
-        android:maxHeight="230dp"
-        android:padding="2dp"
+        android:textColor="#000"
+        android:textSize="10sp"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/my_image_chat_profile_picture"
-        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintEnd_toEndOf="@+id/background_image"
+        tools:text="22:05" />
+
+    <ImageView
+        android:id="@+id/my_image_chat_image"
+        android:layout_width="220dp"
+        android:layout_height="200dp"
+        android:layout_marginTop="4dp"
+        app:layout_constraintStart_toStartOf="@+id/background_image"
+        app:layout_constraintTop_toTopOf="@+id/background_image"
         tools:srcCompat="@tools:sample/backgrounds/scenic" />
+
+    <TextView
+        android:id="@+id/my_image_text"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="2dp"
+        android:layout_marginEnd="8dp"
+        android:paddingTop="2dp"
+        android:textColor="@color/textColor"
+        android:textSize="15sp"
+        app:layout_constraintBottom_toBottomOf="@+id/background_image"
+        app:layout_constraintEnd_toStartOf="@+id/my_image_chat_time_stamp"
+        app:layout_constraintStart_toStartOf="@+id/background_image"
+        app:layout_constraintTop_toBottomOf="@+id/my_image_chat_image"
+        tools:text="Anyone who knows how to make the tunneling successful?" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>

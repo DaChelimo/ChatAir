@@ -18,17 +18,44 @@
         app:layout_constraintTop_toTopOf="parent"
         app:srcCompat="@drawable/ic_baseline_person_24" />
 
-    <TextView
-        android:id="@+id/my_text_chat_text"
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/constraintLayout2"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginEnd="8dp"
         android:background="@drawable/my_chat_text"
         android:maxWidth="250dp"
-        android:padding="12dp"
-        android:text="My chat is longer than yours. Lol. You don't know what you are saying since you just want to add more chat to this."
-        android:textSize="15sp"
+        android:padding="4dp"
+        android:paddingBottom="4dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/my_text_chat_image"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent">
+
+        <TextView
+            android:id="@+id/my_text_chat_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@color/my_chat_background"
+            android:maxWidth="200dp"
+            android:padding="5dp"
+            android:paddingBottom="1dp"
+            android:text="My chat is longer than yours. Lol. You don't know what you are saying since you just want to add more chat to this."
+            android:textColor="#FFF"
+            android:textSize="15sp"
+            app:layout_constraintEnd_toStartOf="@+id/my_text_chat_time_stamp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/my_text_chat_time_stamp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="4dp"
+            android:textColor="@android:color/white"
+            android:textSize="10sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/my_text_chat_text"
+            tools:text="11:23" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
 </androidx.constraintlayout.widget.ConstraintLayout>
